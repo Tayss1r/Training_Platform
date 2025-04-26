@@ -38,12 +38,6 @@
                             <h5 class="mb-3">About This Course</h5>
                             <p class="card-text">{{ course.description }}</p>
                         </div>
-                        
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-primary">
-                                <i class="bx bx-user-plus me-1"></i>Enroll Now
-                            </button>
-                        </div>
                     </div>
                 </div>
 
@@ -62,6 +56,7 @@
                                             <th>Date</th>
                                             <th>Time</th>
                                             <th>Status</th>
+                                            <th>Enroll</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -72,6 +67,11 @@
                                                 <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
                                                 <td>
                                                     <span class="badge bg-label-success">Available</span>
+                                                </td>
+                                                <td>
+                                                    <a href="#" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bx bx-user-plus me-1"></i>Enroll
+                                                    </a>
                                                 </td>
                                             </tr>
                                         {% endfor %}
