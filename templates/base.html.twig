@@ -89,7 +89,7 @@
 
             <ul class="menu-inner py-1">
                 <!-- Dashboard -->
-                <li class="menu-item active">
+                <li class="menu-item">
                     <a href="{{ path('home') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-home-circle"></i>
                         <div data-i18n="Analytics">All Courses</div>
@@ -102,20 +102,22 @@
                         <span class="menu-header-text">Categories</span>
                     </li>
                     {% for category in categories %}
-                        <li class="menu-item">
-                            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                                <div data-i18n="Layouts">{{ category.name }}</div>
-                            </a>
-                            <ul class="menu-sub">
-                                {% for course in category.courses %}
-                                    <li class="menu-item">
-                                        <a href="{{ path('course_show', {'id': course.id}) }}" class="menu-link">
-                                            <div data-i18n="Account">{{ course.title }}</div>
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </li>
+                        {% if category.courses|length > 0 %}
+                            <li class="menu-item">
+                                <a href="{{ path('category_courses', {'id': category.id}) }}" class="menu-link">
+                                    <div data-i18n="Layouts">{{ category.name }}</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    {% for course in category.courses %}
+                                        <li class="menu-item">
+                                            <a href="{{ path('course_show', {'id': course.id}) }}" class="menu-link">
+                                                <div data-i18n="Account">{{ course.title }}</div>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endif %}
                     {% endfor %}
                 {% endif %}
                 {% if is_granted('ROLE_ADMIN') %}
