@@ -129,11 +129,9 @@
                                     <div data-i18n="Account">{# {{ i.name }} #}</div>
                                 </a>
                             </li>
-                        {# {% endfor %} #}
-                    </ul>
-                </li>
-                {# {% endfor %} #}
-                </li>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
                 {% if is_granted('ROLE_ADMIN') %}
                     <li class="menu-item">
                         <a href="#" class="menu-link">
@@ -208,6 +206,8 @@
                                                     <small class="text-muted">
                                                         {% if 'ROLE_ADMIN' in app.user.roles %}
                                                             Admin
+                                                        {% elseif 'ROLE_INSTRUCTOR' in app.user.roles %}
+                                                            Instructor
                                                         {% elseif 'ROLE_USER' in app.user.roles %}
                                                             User
                                                         {% else %}
@@ -299,19 +299,14 @@
 </div>
 <!-- / Layout wrapper -->
 <!-- Core JS -->
-<!-- build:js assets/vendor/js/core.js -->
-<script src="{{ asset('/assets/vendor/libs/jquery/jquery.js') }}"></script>
-<script src="{{ asset('/assets/vendor/libs/popper/popper.js') }}"></script>
-<script src="{{ asset('/assets/vendor/js/bootstrap.js') }}"></script>
-<script src="{{ asset('/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
-
-<script src="{{ asset('/assets/vendor/js/menu.js') }}"></script>
-<!-- endbuild -->
-
-<!-- Vendors JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="{{ asset('vendor/js/bootstrap.js') }}"></script>
+<script src="{{ asset('vendor/js/helpers.js') }}"></script>
+<script src="{{ asset('vendor/js/menu.js') }}"></script>
 
 <!-- Main JS -->
-<script src="{{ asset('/assets/js/main.js') }}"></script>
+<script src="{{ asset('vendor/js/main.js') }}"></script>
 
 <!-- Page JS -->
 

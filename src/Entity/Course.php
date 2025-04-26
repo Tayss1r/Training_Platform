@@ -22,14 +22,30 @@ class Course
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $duration = null;
+
     #[ORM\ManyToOne(inversedBy: 'courses')]
     private ?Category $category = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'instructedCourses')]
+    #[ORM\JoinColumn(nullable: false)]
+    private User $instructor;
 
     /**
      * @var Collection<int, Session>
      */
     #[ORM\OneToMany(targetEntity: Session::class, mappedBy: 'course')]
     private Collection $sessions;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $lastUpdatedAt = null;
 
     public function __construct()
     {
@@ -65,6 +81,30 @@ class Course
         return $this;
     }
 
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+    public function getDuration(): ?int
+    {
+        return $this->duration;
+    }
+
+    public function setDuration(?int $duration): static
+    {
+        $this->duration = $duration;
+
+        return $this;
+    }
+
     public function getCategory(): ?Category
     {
         return $this->category;
@@ -74,6 +114,17 @@ class Course
     {
         $this->category = $category;
 
+        return $this;
+    }
+
+    public function getInstructor(): User
+    {
+        return $this->instructor;
+    }
+
+    public function setInstructor(User $instructor): static
+    {
+        $this->instructor = $instructor;
         return $this;
     }
 
@@ -105,5 +156,27 @@ class Course
         }
 
         return $this;
+    }
+
+    public function setCreatedAt(?\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setLastUpdatedAt(?\DateTimeInterface $lastUpdatedAt): static
+    {
+        $this->lastUpdatedAt = $lastUpdatedAt;
+        return $this;
+    }
+
+    public function getLastUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->lastUpdatedAt;
     }
 }

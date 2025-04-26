@@ -34,15 +34,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $firstName = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $lastName = null;
+
     /**
      * @var Collection<int, Enrollment>
      */
     #[ORM\OneToMany(targetEntity: Enrollment::class, mappedBy: 'users')]
     private Collection $enrollments;
 
+    /**
+     * @var Collection<int, Course>
+     */
+    #[ORM\OneToMany(targetEntity: Course::class, mappedBy: 'instructor')]
+    private Collection $instructedCourses;
+
     public function __construct()
     {
         $this->enrollments = new ArrayCollection();
+        $this->instructedCourses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -111,6 +124,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(string $firstName): static
+    {
+        $this->firstName = $firstName;
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(string $lastName): static
+    {
+        $this->lastName = $lastName;
+        return $this;
+    }
+
     /**
      * @see UserInterface
      */
@@ -146,6 +181,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $enrollment->setUsers(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Course>
+     */
+    public function getInstructedCourses(): Collection
+    {
+        return $this->instructedCourses;
+    }
+
+    public function addInstructedCourse(Course $course): static
+    {
+        if (!$this->instructedCourses->contains($course)) {
+            $this->instructedCourses->add($course);
+            $course->setInstructor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInstructedCourse(Course $course): static
+    {
+        $this->instructedCourses->removeElement($course);
 
         return $this;
     }

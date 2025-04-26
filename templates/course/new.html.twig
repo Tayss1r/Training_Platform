@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create New Course{% endblock %}
+
+{% block body %}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="fw-bold mb-0">Create New Course</h4>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                        <div class="mb-3">
+                            {{ form_label(form.title, 'Course Title', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+                            <div class="invalid-feedback">
+                                Please provide a course title.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+                            <div class="invalid-feedback">
+                                Please provide a course description.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.image, 'Course Image', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.image, {'attr': {'class': 'form-control'}}) }}
+                            <div class="form-text">Upload a JPEG, PNG, or GIF image (max 1MB)</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.duration, 'Duration (hours)', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.duration, {'attr': {'class': 'form-control'}}) }}
+                                <div class="invalid-feedback">
+                                    Please provide the course duration.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.category, 'Category', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.category, {'attr': {'class': 'form-select'}}) }}
+                                <div class="invalid-feedback">
+                                    Please select a category.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ path('home') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bx bx-save"></i> Create Course
+                            </button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascripts %}
+<script>
+// Form validation
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+</script>
+{% endblock %}
+{% endblock %} 
