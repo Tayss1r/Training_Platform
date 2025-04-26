@@ -17,7 +17,6 @@
         class="light-style layout-menu-fixed"
         dir="ltr"
         data-theme="theme-default"
-        data-assets-path="assets/"
         data-template="vertical-menu-template-free"
 >
 <head>
@@ -43,27 +42,25 @@
             rel="stylesheet"
     />
 
-
-    <!-- Icons. Uncomment required icon fonts -->
-    <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}" />
+    <!-- Icons -->
+    <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}" />
+    
     <!-- Core CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-default.css') }}" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
-
+    <link rel="stylesheet" href="{{ asset('vendor/css/core.css') }}" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="{{ asset('vendor/css/theme-default.css') }}" class="template-customizer-theme-css" />
+    
     <!-- Vendors CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
+    <link rel="stylesheet" href="{{ asset('vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
 
     <!-- Page CSS -->
     {% block css %}
     {% endblock %}
+
     <!-- Helpers -->
-    <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>
+    <script src="{{ asset('vendor/js/helpers.js') }}"></script>
 
-
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-    <script src="{{ asset('assets/js/config.js') }}"></script>
+    <!-- Config -->
+    <script src="{{ asset('vendor/js/config.js') }}"></script>
 
     <link rel="stylesheet" href="{{ asset('assets/styles/app.css') }}" />
 </head>
@@ -100,26 +97,27 @@
                 </li>
 
                 <!-- Layouts -->
-
-                <li class="menu-header small text-uppercase">
-                    <span class="menu-header-text">Categories</span>
-                </li>
-                {% for category in categories %}
-                    <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <div data-i18n="Layouts">{{ category.name }}</div>
-                        </a>
-                        <ul class="menu-sub">
-                            {% for course in category.courses %}
-                                <li class="menu-item">
-                                    <a href="{{ path('course_show', {'id': course.id}) }}" class="menu-link">
-                                        <div data-i18n="Account">{{ course.title }}</div>
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                {% if categories is defined and categories|length > 0 %}
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">Categories</span>
                     </li>
-                {% endfor %}
+                    {% for category in categories %}
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Layouts">{{ category.name }}</div>
+                            </a>
+                            <ul class="menu-sub">
+                                {% for course in category.courses %}
+                                    <li class="menu-item">
+                                        <a href="{{ path('course_show', {'id': course.id}) }}" class="menu-link">
+                                            <div data-i18n="Account">{{ course.title }}</div>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% endfor %}
+                {% endif %}
                 {% if is_granted('ROLE_ADMIN') %}
                     <li class="menu-item">
                         <a href="#" class="menu-link">
@@ -202,8 +200,6 @@
                                                     <span class="fw-semibold d-block">Guest</span>
                                                     <small class="text-muted">No role assigned</small>
                                                 {% endif %}
-
-
                                             </div>
                                         </div>
                                     </a>
@@ -211,36 +207,51 @@
                                 <li>
                                     <div class="dropdown-divider"></div>
                                 </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bx bx-user me-2"></i>
-                                        <span class="align-middle">My Profile</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bx bx-cog me-2"></i>
-                                        <span class="align-middle">Settings</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                        <span class="d-flex align-items-center align-middle">
-                          <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
-                          <span class="flex-grow-1 align-middle">Billing</span>
-                          <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
-                        </span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <div class="dropdown-divider"></div>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{# {{ path('app_logout') }} #}">
-                                        <i class="bx bx-power-off me-2"></i>
-                                        <span class="align-middle">Logout</span>
-                                    </a>
-                                </li>
+                                {% if app.user %}
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="bx bx-user me-2"></i>
+                                            <span class="align-middle">My Profile</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="bx bx-cog me-2"></i>
+                                            <span class="align-middle">Settings</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <span class="d-flex align-items-center align-middle">
+                                                <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
+                                                <span class="flex-grow-1 align-middle">Billing</span>
+                                                <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-divider"></div>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('app_logout') }}">
+                                            <i class="bx bx-power-off me-2"></i>
+                                            <span class="align-middle">Logout</span>
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('app_login') }}">
+                                            <i class="bx bx-log-in me-2"></i>
+                                            <span class="align-middle">Login</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('app_register') }}">
+                                            <i class="bx bx-user-plus me-2"></i>
+                                            <span class="align-middle">Register</span>
+                                        </a>
+                                    </li>
+                                {% endif %}
                             </ul>
                         </li>
                         <!--/ User -->
@@ -283,21 +294,17 @@
 </div>
 <!-- / Layout wrapper -->
 <!-- Core JS -->
-<!-- build:js assets/vendor/js/core.js -->
-<script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
-<script src="{{ asset('assets/vendor/libs/popper/popper.js') }}"></script>
-<script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script>
-<script src="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
-
-<script src="{{ asset('assets/vendor/js/menu.js') }}"></script>
-<!-- endbuild -->
-
-<!-- Vendors JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="{{ asset('vendor/js/bootstrap.js') }}"></script>
+<script src="{{ asset('vendor/js/helpers.js') }}"></script>
+<script src="{{ asset('vendor/js/menu.js') }}"></script>
 
 <!-- Main JS -->
-<script src="{{ asset('assets/js/main.js') }}"></script>
+<script src="{{ asset('vendor/js/main.js') }}"></script>
 
 <!-- Page JS -->
+{% block javascripts %}{% endblock %}
 
 <!-- Place this tag in your head or just before your close body tag. -->
 <script async defer src="https://buttons.github.io/buttons.js"></script>
