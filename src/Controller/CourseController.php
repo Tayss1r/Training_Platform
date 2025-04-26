@@ -13,6 +13,18 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class CourseController extends AbstractController
 {
+    #[Route('/', name: 'home')]
+    public function index(EntityManagerInterface $entityManager): Response
+    {
+        $categories = $entityManager->getRepository(Category::class)->findAll();
+        $courses = $entityManager->getRepository(Course::class)->findAll();
+
+        return $this->render('course/index.html.twig', [
+            'categories' => $categories,
+            'courses' => $courses,
+        ]);
+    }
+
     #[Route('/course/{id}', name: 'course_show')]
     public function show(Course $course, EntityManagerInterface $entityManager): Response
     {
