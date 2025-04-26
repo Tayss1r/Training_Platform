@@ -1,0 +1,199 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ course.title }}{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <!-- Course Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ path('home') }}">Courses</a></li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ path('category_courses', {'id': course.category.id}) }}">{{ course.category.name }}</a>
+                        </li>
+                        <li class="breadcrumb-item active fw-bold" aria-current="page">{{ course.title }}</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Course Main Content -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                        <i class="bx bx-book-open text-muted" style="font-size: 6rem;"></i>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-label-primary">{{ course.category.name }}</span>
+                            <span class="text-muted">
+                                <i class="bx bx-time me-1"></i>{{ course.duration }} hours
+                            </span>
+                        </div>
+                        <h1 class="card-title mb-4">{{ course.title }}</h1>
+                        <div class="mb-4">
+                            <h5 class="mb-3">About This Course</h5>
+                            <p class="card-text">{{ course.description }}</p>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary">
+                                <i class="bx bx-user-plus me-1"></i>Enroll Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Sessions -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Course Sessions</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if course.sessions|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Session</th>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for session in course.sessions %}
+                                            <tr>
+                                                <td>Session {{ loop.index }}</td>
+                                                <td>{{ session.date|date('Y-m-d') }}</td>
+                                                <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                                <td>
+                                                    <span class="badge bg-label-success">Available</span>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                No sessions scheduled for this course yet.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Sidebar -->
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Course Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-3">
+                                <i class="bx bx-category me-2"></i>
+                                <strong>Category:</strong> {{ course.category.name }}
+                            </li>
+                            <li class="mb-3">
+                                <i class="bx bx-time me-2"></i>
+                                <strong>Duration:</strong> {{ course.duration }} hours
+                            </li>
+                            <li class="mb-3">
+                                <i class="bx bx-calendar me-2"></i>
+                                <strong>Sessions:</strong> {{ course.sessions|length }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{{ path('home') }}" class="btn btn-outline-secondary">
+                                <i class="bx bx-arrow-back me-1"></i>Back to Courses
+                            </a>
+                            <a href="{{ path('course_download_syllabus', {'id': course.id}) }}" class="btn btn-outline-primary">
+                                <i class="bx bx-download me-1"></i>Download Syllabus
+                            </a>
+                            <button type="button" class="btn btn-outline-primary" id="share-course-btn">
+                                <i class="bx bx-share-alt me-1"></i>Share Course
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Dialog Modal -->
+    <div id="share-modal" style="display:none; position:fixed; z-index:1050; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:16px; max-width:420px; width:90vw; margin:auto; padding:32px 24px 24px 24px; position:relative; box-shadow:0 4px 32px rgba(0,0,0,0.18);">
+            <button id="close-share-modal" style="position:absolute; top:18px; right:18px; background:none; border:none; font-size:1.5rem; color:#888; cursor:pointer;">&times;</button>
+            <h3 style="font-weight:700; font-size:1.25rem; margin-bottom:18px;">Share this course</h3>
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:18px;">
+                <input id="share-link-input" type="text" readonly style="flex:1; padding:8px 12px; border:1px solid #ccc; border-radius:6px; font-size:1rem;" />
+                <button id="copy-share-link" style="background:#7c3aed; color:#fff; border:none; border-radius:6px; padding:8px 18px; font-weight:600; cursor:pointer;">Copy</button>
+            </div>
+            <div id="copy-confirm" style="display:none; color:#16a34a; font-size:0.95rem; margin-bottom:10px;">Copied!</div>
+            <div style="display:flex; gap:18px; justify-content:center; margin-top:10px;">
+                <a id="share-facebook" href="#" title="Share on Facebook" style="color:#7c3aed; font-size:2rem;"><i class="fab fa-facebook"></i></a>
+                <a id="share-x" href="#" title="Share on X" style="color:#7c3aed; font-size:2rem;"><i class="fab fa-x-twitter"></i></a>
+                <a id="share-email" href="#" title="Share by Email" style="color:#7c3aed; font-size:2rem;"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Open modal
+    const shareBtn = document.getElementById('share-course-btn');
+    const shareModal = document.getElementById('share-modal');
+    const closeShareModal = document.getElementById('close-share-modal');
+    const shareLinkInput = document.getElementById('share-link-input');
+    const copyBtn = document.getElementById('copy-share-link');
+    const copyConfirm = document.getElementById('copy-confirm');
+
+    shareBtn.onclick = function() {
+        shareLinkInput.value = window.location.href;
+        shareModal.style.display = 'flex';
+        copyConfirm.style.display = 'none';
+    }
+    closeShareModal.onclick = function() {
+        shareModal.style.display = 'none';
+    }
+    shareModal.onclick = function(e) {
+        if (e.target === shareModal) shareModal.style.display = 'none';
+    }
+    copyBtn.onclick = function() {
+        shareLinkInput.select();
+        shareLinkInput.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(shareLinkInput.value).then(function() {
+            copyConfirm.style.display = 'block';
+            setTimeout(() => copyConfirm.style.display = 'none', 1500);
+        });
+    }
+    // Social share links
+    const fb = document.getElementById('share-facebook');
+    const x = document.getElementById('share-x');
+    const email = document.getElementById('share-email');
+    fb.onclick = function(e) {
+        e.preventDefault();
+        window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href), '_blank');
+    }
+    x.onclick = function(e) {
+        e.preventDefault();
+        window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(window.location.href), '_blank');
+    }
+    email.onclick = function(e) {
+        e.preventDefault();
+        window.location.href = 'mailto:?subject=' + encodeURIComponent(document.title) + '&body=' + encodeURIComponent(window.location.href);
+    }
+    </script>
+{% endblock %} 

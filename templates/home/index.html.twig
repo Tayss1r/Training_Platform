@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Welcome to Training Platform{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h4 class="fw-bold py-3 mb-4">
+            <span class="text-muted fw-light">All</span> Courses
+        </h4>
+
+        {% if courses|length > 0 %}
+            <div class="row">
+                {% for course in courses %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="bx bx-book-open text-muted" style="font-size: 4rem;"></i>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ course.title }}</h5>
+                                <p class="card-text text-muted">{{ course.description|slice(0, 150) }}...</p>
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-label-primary">{{ course.category.name }}</span>
+                                        <span class="text-muted">{{ course.duration }} hours</span>
+                                    </div>
+                                    <div class="d-grid gap-2 mt-3">
+                                        <a href="{{ path('course_show', {'id': course.id}) }}" class="btn btn-primary">
+                                            <i class="bx bx-show me-1"></i>View Course
+                                        </a>
+                                        <a href="#" class="btn btn-outline-primary">
+                                            <i class="bx bx-user-plus me-1"></i>Enroll Now
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No courses available at the moment.
+            </div>
+        {% endif %}
+    </div>
+{% endblock %} 
