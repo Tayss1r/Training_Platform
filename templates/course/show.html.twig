@@ -65,9 +65,19 @@
                                                 <td>Session {{ loop.index }}</td>
                                                 <td>{{ session.date|date('Y-m-d') }}</td>
                                                 <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
-                                                <td>
-                                                    <span class="badge bg-label-success">Available</span>
-                                                </td>
+                                                {% if session.capacity == 0 %}
+                                                    <td>
+                                                        <span class="badge bg-label-danger">Full</span>
+                                                    </td>
+                                                {% elseif session.date < date() %}
+                                                    <td>
+                                                        <span class="badge bg-label-danger">Expired</span>
+                                                    </td>
+                                                {% else %}
+                                                    <td>
+                                                        <span class="badge bg-label-success">Available</span>
+                                                    </td>
+                                                {% endif %}
                                                 <td>
                                                     <a href="#" class="btn btn-sm btn-outline-primary">
                                                         <i class="bx bx-user-plus me-1"></i>Enroll
