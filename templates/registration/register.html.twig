@@ -1,0 +1,67 @@
+{% extends 'templateRegister.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block body %}
+    <div class="container-xxl">
+        <div class="authentication-wrapper authentication-basic container-p-y">
+            <div class="authentication-inner">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Logo -->
+                        <div class="app-brand justify-content-center">
+                            <a href="#" class="app-brand-link gap-2">
+                                <span class="app-brand-logo demo">
+                                    <img src="#" alt="Brand Logo" class="img-fluid mb-1" width="35"/>
+                                </span>
+                                <span class="app-brand-text demo text-body fw-bolder">Forminy</span>
+                            </a>
+                        </div>
+                        <!-- /Logo -->
+
+                        <h4 class="mb-2">Adventure starts here 🚀</h4>
+                        <p class="mb-4">Sign Up to Forminy account and find the perfect Courses!</p>
+
+                        {% for flash_error in app.flashes('verify_email_error') %}
+                            <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+                        {% endfor %}
+
+                        {{ form_start(registrationForm) }}
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control', 'placeholder': 'Enter your email'}}) }}
+                            {{ form_errors(registrationForm.email) }}
+                        </div>
+
+                        <div class="mb-3 form-password-toggle">
+                            {{ form_label(registrationForm.plainPassword, 'Password', {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="input-group input-group-merge">
+                                {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control', 'placeholder': '••••••••••'}}) }}
+                                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                            </div>
+                            {{ form_errors(registrationForm.plainPassword) }}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input'}}) }}
+                                {{ form_label(registrationForm.agreeTerms, 'I agree to the terms & conditions'|raw, {'label_attr': {'class': 'form-check-label'}}) }}
+                                {{ form_errors(registrationForm.agreeTerms) }}
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary d-grid w-100" type="submit">Sign Up</button>
+
+                        {{ form_end(registrationForm) }}
+
+                        <p class="text-center mt-3">
+                            <span>Already have an account?</span>
+                            <a href="{{ path('app_login') }}"><span>Login</span></a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
