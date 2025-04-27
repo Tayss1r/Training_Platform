@@ -102,25 +102,40 @@
                         <span class="menu-header-text">Categories</span>
                     </li>
                     {% for category in categories %}
-                        {% if category.courses|length > 0 %}
-                            <li class="menu-item">
-                                <a href="{{ path('category_courses', {'id': category.id}) }}" class="menu-link">
-                                    <div data-i18n="Layouts">{{ category.name }}</div>
-                                </a>
-                                <ul class="menu-sub">
-                                    {% for course in category.courses %}
-                                        <li class="menu-item">
-                                            <a href="{{ path('course_show', {'id': course.id}) }}" class="menu-link">
-                                                <div data-i18n="Account">{{ course.title }}</div>
-                                            </a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                        {% endif %}
+                        <li class="menu-item">
+                            <a href="{{ path('category_courses', {'id': category.id}) }}" class="menu-link">
+                                <div data-i18n="Layouts">{{ category.name }}</div>
+                            </a>
+                            {% if category.courses|length > 0 %}
+                            <ul class="menu-sub">
+                                {% for course in category.courses %}
+                                    <li class="menu-item">
+                                        <a href="{{ path('course_show', {'id': course.id}) }}" class="menu-link">
+                                            <div data-i18n="Account">{{ course.title }}</div>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </li>
                     {% endfor %}
                 {% endif %}
                 {% if is_granted('ROLE_ADMIN') %}
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">Admin</span>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('admin_dashboard') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <div data-i18n="Analytics">Dashboard</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('admin_sessions') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-calendar"></i>
+                            <div data-i18n="Analytics">Manage Sessions</div>
+                        </a>
+                    </li>
                     <li class="menu-item">
                         <a href="#" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-plus"></i>

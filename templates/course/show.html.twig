@@ -9,11 +9,9 @@
             <div class="col-12">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ path('home') }}">Courses</a></li>
-                        <li class="breadcrumb-item">
-                            <a href="{{ path('category_courses', {'id': course.category.id}) }}">{{ course.category.name }}</a>
-                        </li>
-                        <li class="breadcrumb-item active fw-bold" aria-current="page">{{ course.title }}</li>
+                        <li class="breadcrumb-item"><a href="{{ path('home') }}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{{ path('category_courses', {'id': course.category.id}) }}">{{ course.category.name }}</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ course.title }}</li>
                     </ol>
                 </nav>
             </div>
@@ -156,6 +154,8 @@
             <div style="display:flex; gap:18px; justify-content:center; margin-top:10px;">
                 <a id="share-facebook" href="#" title="Share on Facebook" style="color:#7c3aed; font-size:2rem;"><i class="fab fa-facebook"></i></a>
                 <a id="share-x" href="#" title="Share on X" style="color:#7c3aed; font-size:2rem;"><i class="fab fa-x-twitter"></i></a>
+                <a id="share-linkedin" href="#" title="Share on LinkedIn" style="color:#7c3aed; font-size:2rem;"><i class="fab fa-linkedin"></i></a>
+                <a id="share-whatsapp" href="#" title="Share on WhatsApp" style="color:#7c3aed; font-size:2rem;"><i class="fab fa-whatsapp"></i></a>
                 <a id="share-email" href="#" title="Share by Email" style="color:#7c3aed; font-size:2rem;"><i class="fas fa-envelope"></i></a>
             </div>
         </div>
@@ -181,29 +181,69 @@
     shareModal.onclick = function(e) {
         if (e.target === shareModal) shareModal.style.display = 'none';
     }
-    copyBtn.onclick = function() {
-        shareLinkInput.select();
-        shareLinkInput.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(shareLinkInput.value).then(function() {
+    copyBtn.onclick = async function() {
+        try {
+            copyBtn.disabled = true;
+            copyBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i>Copying...';
+            
+            shareLinkInput.select();
+            shareLinkInput.setSelectionRange(0, 99999);
+            
+            await navigator.clipboard.writeText(shareLinkInput.value);
+            
             copyConfirm.style.display = 'block';
-            setTimeout(() => copyConfirm.style.display = 'none', 1500);
-        });
+            copyConfirm.style.opacity = '0';
+            copyConfirm.style.transform = 'translateY(10px)';
+            
+            // Trigger reflow
+            copyConfirm.offsetHeight;
+            
+            copyConfirm.style.transition = 'all 0.3s ease';
+            copyConfirm.style.opacity = '1';
+            copyConfirm.style.transform = 'translateY(0)';
+            
+            setTimeout(() => {
+                copyConfirm.style.opacity = '0';
+                copyConfirm.style.transform = 'translateY(10px)';
+            }, 1500);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+            copyConfirm.textContent = 'Failed to copy. Please try again.';
+            copyConfirm.style.display = 'block';
+        } finally {
+            copyBtn.disabled = false;
+            copyBtn.innerHTML = 'Copy';
+        }
     }
     // Social share links
     const fb = document.getElementById('share-facebook');
     const x = document.getElementById('share-x');
+    const linkedin = document.getElementById('share-linkedin');
+    const whatsapp = document.getElementById('share-whatsapp');
     const email = document.getElementById('share-email');
+    
+    const shareUrl = encodeURIComponent(window.location.href);
+    const shareTitle = encodeURIComponent(document.title);
+    
     fb.onclick = function(e) {
         e.preventDefault();
-        window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href), '_blank');
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`, '_blank');
     }
     x.onclick = function(e) {
         e.preventDefault();
-        window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(window.location.href), '_blank');
+        window.open(`https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareTitle}`, '_blank');
+    }
+    linkedin.onclick = function(e) {
+        e.preventDefault();
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`, '_blank');
+    }
+    whatsapp.onclick = function(e) {
+        e.preventDefault();
+        window.open(`https://wa.me/?text=${shareTitle}%20${shareUrl}`, '_blank');
     }
     email.onclick = function(e) {
         e.preventDefault();
-        window.location.href = 'mailto:?subject=' + encodeURIComponent(document.title) + '&body=' + encodeURIComponent(window.location.href);
+        window.location.href = `mailto:?subject=${shareTitle}&body=${shareUrl}`;
     }
     </script>
 {% endblock %} 

@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Admin</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('admin_sessions') }}">Manage Sessions</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ title }}</h5>
+                        <a href="{{ path('admin_sessions') }}" class="btn btn-outline-secondary">
+                            <i class="bx bx-arrow-back me-1"></i>Back to Sessions
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form, {'attr': {'class': 'row g-3'}}) }}
+                            <div class="col-md-6">
+                                <label class="form-label" for="{{ form.course.vars.id }}">Course</label>
+                                {{ form_widget(form.course, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.course) }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="{{ form.date.vars.id }}">Date</label>
+                                {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.date) }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="{{ form.startTime.vars.id }}">Start Time</label>
+                                {{ form_widget(form.startTime, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.startTime) }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="{{ form.endTime.vars.id }}">End Time</label>
+                                {{ form_widget(form.endTime, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.endTime) }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="{{ form.capacity.vars.id }}">Capacity</label>
+                                {{ form_widget(form.capacity, {'attr': {'class': 'form-control', 'min': '1'}}) }}
+                                {{ form_errors(form.capacity) }}
+                            </div>
+                            <div class="col-12 d-flex justify-content-end gap-2">
+                                <a href="{{ path('admin_sessions') }}" class="btn btn-label-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bx bx-save me-1"></i>Save Session
+                                </button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date picker with min date as today
+        const dateInput = document.querySelector('#{{ form.date.vars.id }}');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.setAttribute('min', today);
+        }
+        
+        // Validate end time is after start time
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const startTime = document.querySelector('#{{ form.startTime.vars.id }}').value;
+                const endTime = document.querySelector('#{{ form.endTime.vars.id }}').value;
+                
+                if (startTime && endTime && startTime >= endTime) {
+                    e.preventDefault();
+                    alert('End time must be after start time');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %} 

@@ -8,6 +8,23 @@
             <span class="text-muted fw-light">All</span> Courses
         </h4>
 
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page">Home</li>
+            </ol>
+        </nav>
+
+        <form method="get" class="mb-3 d-flex justify-content-end align-items-center" id="sort-form">
+            <label for="sort-select" class="me-2 mb-0">Sort by:</label>
+            <select name="sort" id="sort-select" class="form-select w-auto" onchange="document.getElementById('sort-form').submit();">
+                <option value="title_asc" {% if selectedSort == 'title_asc' %}selected{% endif %}>Title (A-Z)</option>
+                <option value="title_desc" {% if selectedSort == 'title_desc' %}selected{% endif %}>Title (Z-A)</option>
+                <option value="duration_asc" {% if selectedSort == 'duration_asc' %}selected{% endif %}>Duration (Shortest)</option>
+                <option value="duration_desc" {% if selectedSort == 'duration_desc' %}selected{% endif %}>Duration (Longest)</option>
+            </select>
+            <input type="hidden" name="page" value="{{ currentPage }}">
+        </form>
+
         {% if courses|length > 0 %}
             <div class="row">
                 {% for course in courses %}
@@ -35,6 +52,21 @@
                     </div>
                 {% endfor %}
             </div>
+            <nav aria-label="Courses pagination">
+                <ul class="pagination justify-content-center mt-4">
+                    <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                        <a class="page-link" href="?page={{ currentPage - 1 }}">Previous</a>
+                    </li>
+                    {% for p in 1..totalPages %}
+                        <li class="page-item {% if p == currentPage %}active{% endif %}">
+                            <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+                        </li>
+                    {% endfor %}
+                    <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
+                        <a class="page-link" href="?page={{ currentPage + 1 }}">Next</a>
+                    </li>
+                </ul>
+            </nav>
         {% else %}
             <div class="alert alert-info">
                 No courses available at the moment.
