@@ -9,11 +9,9 @@
             <div class="col-12">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ path('home') }}">Courses</a></li>
-                        <li class="breadcrumb-item">
-                            <a href="{{ path('category_courses', {'id': course.category.id}) }}">{{ course.category.name }}</a>
-                        </li>
-                        <li class="breadcrumb-item active fw-bold" aria-current="page">{{ course.title }}</li>
+                        <li class="breadcrumb-item"><a href="{{ path('home') }}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{{ path('category_courses', {'id': course.category.id}) }}">{{ course.category.name }}</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ course.title }}</li>
                     </ol>
                 </nav>
             </div>

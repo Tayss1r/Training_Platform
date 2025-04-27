@@ -1,0 +1,212 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Sessions{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Admin</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Manage Sessions</li>
+            </ol>
+        </nav>
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <form id="filter-form" method="get" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="category-select" class="form-label">Category</label>
+                        <select id="category-select" name="category" class="form-select">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if selectedCategoryId == category.id %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="course-select" class="form-label">Course</label>
+                        <select id="course-select" name="course" class="form-select">
+                            <option value="">All Courses</option>
+                            {% for course in courses %}
+                                <option value="{{ course.id }}" data-category="{{ course.category.id }}" {% if selectedCourseId == course.id %}selected{% endif %}>{{ course.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary"><i class="bx bx-filter-alt me-1"></i>Filter</button>
+                        <a href="{{ path('admin_sessions') }}" class="btn btn-outline-secondary ms-2">Reset</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const categorySelect = document.getElementById('category-select');
+                const courseSelect = document.getElementById('course-select');
+                const filterForm = document.getElementById('filter-form');
+
+                // Filter courses by selected category
+                function filterCourses() {
+                    const selectedCategory = categorySelect.value;
+                    Array.from(courseSelect.options).forEach(option => {
+                        if (!option.value) {
+                            option.style.display = '';
+                            return;
+                        }
+                        const courseCategory = option.getAttribute('data-category');
+                        option.style.display = (!selectedCategory || courseCategory === selectedCategory) ? '' : 'none';
+                    });
+                    // If selected course is not in filtered list, reset selection
+                    if (courseSelect.selectedOptions.length && courseSelect.selectedOptions[0].style.display === 'none') {
+                        courseSelect.value = '';
+                    }
+                }
+
+                categorySelect.addEventListener('change', function() {
+                    filterCourses();
+                    filterForm.submit();
+                });
+                courseSelect.addEventListener('change', function() {
+                    filterForm.submit();
+                });
+                filterCourses();
+            });
+        </script>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Training Sessions</h5>
+                <a href="{{ path('admin_session_new') }}" class="btn btn-primary">
+                    <i class="bx bx-plus me-1"></i>Add New Session
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive text-nowrap">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Capacity</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-border-bottom-0">
+                            {% for session in sessions %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ session.course.title }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ session.course.category.name }}</small>
+                                    </td>
+                                    <td>{{ session.date|date('Y-m-d') }}</td>
+                                    <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                    <td>{{ session.capacity }}</td>
+                                    <td>
+                                        {% if session.date < date() %}
+                                            <span class="badge bg-label-danger">Expired</span>
+                                        {% else %}
+                                            <span class="badge bg-label-success">Active</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" href="{{ path('admin_session_edit', {'id': session.id}) }}">
+                                                    <i class="bx bx-edit-alt me-1"></i>Edit
+                                                </a>
+                                                <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteModal{{ session.id }}">
+                                                    <i class="bx bx-trash me-1"></i>Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Delete Modal -->
+                                <div class="modal fade" id="deleteModal{{ session.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Delete Session</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-12 mb-3">
+                                                        <div class="alert alert-warning">
+                                                            <div class="d-flex align-items-center">
+                                                                <i class="bx bx-error-circle me-2 fs-4"></i>
+                                                                <h6 class="alert-heading mb-0">Are you sure?</h6>
+                                                            </div>
+                                                            <p class="mb-0 mt-2" style="word-break: break-word; white-space: normal;">This action cannot be undone. This will permanently delete the session for "{{ session.course.title }}" scheduled on {{ session.date|date('Y-m-d') }}.</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="card bg-label-secondary">
+                                                            <div class="card-body">
+                                                                <h6 class="card-title">Session Details</h6>
+                                                                <ul class="list-unstyled mb-0">
+                                                                    <li class="mb-2"><strong>Course:</strong> {{ session.course.title }}</li>
+                                                                    <li class="mb-2"><strong>Date:</strong> {{ session.date|date('Y-m-d') }}</li>
+                                                                    <li class="mb-2"><strong>Time:</strong> {{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</li>
+                                                                    <li><strong>Capacity:</strong> {{ session.capacity }}</li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <form action="{{ path('admin_session_delete', {'id': session.id}) }}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-danger">
+                                                        <i class="bx bx-trash me-1"></i>Delete Session
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No sessions found</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination Controls -->
+                {% if totalPages > 1 %}
+                <nav aria-label="Sessions pagination">
+                    <ul class="pagination justify-content-center mt-3">
+                        <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                            <a class="page-link" href="?category={{ selectedCategoryId }}&course={{ selectedCourseId }}&page={{ currentPage - 1 }}">Previous</a>
+                        </li>
+                        {% for p in 1..totalPages %}
+                            <li class="page-item {% if p == currentPage %}active{% endif %}">
+                                <a class="page-link" href="?category={{ selectedCategoryId }}&course={{ selectedCourseId }}&page={{ p }}">{{ p }}</a>
+                            </li>
+                        {% endfor %}
+                        <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
+                            <a class="page-link" href="?category={{ selectedCategoryId }}&course={{ selectedCourseId }}&page={{ currentPage + 1 }}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %} 

@@ -1,0 +1,160 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Admin</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+            </ol>
+        </nav>
+
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <span class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white" style="width:48px;height:48px;"><i class="bx bx-book-open fs-4"></i></span>
+                        <div>
+                            <h6 class="mb-1">Total Courses</h6>
+                            <h3 class="mb-0 fw-bold">{{ courses|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <span class="d-flex align-items-center justify-content-center rounded-circle bg-success text-white" style="width:48px;height:48px;"><i class="bx bx-category fs-4"></i></span>
+                        <div>
+                            <h6 class="mb-1">Total Categories</h6>
+                            <h3 class="mb-0 fw-bold">{{ categories|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <span class="d-flex align-items-center justify-content-center rounded-circle bg-info text-white" style="width:48px;height:48px;"><i class="bx bx-calendar fs-4"></i></span>
+                        <div>
+                            <h6 class="mb-1">Total Sessions</h6>
+                            <h3 class="mb-0 fw-bold">{{ sessions|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <span class="d-flex align-items-center justify-content-center rounded-circle bg-warning text-white" style="width:48px;height:48px;"><i class="bx bx-user fs-4"></i></span>
+                        <div>
+                            <h6 class="mb-1">Admins</h6>
+                            <h3 class="mb-0 fw-bold">1+</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card bg-light border-0 shadow-sm h-100">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <span class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white" style="width:40px;height:40px;"><i class="bx bx-calendar fs-5"></i></span>
+                            <div>
+                                <h6 class="mb-0">Manage Sessions</h6>
+                                <small>View and manage course sessions</small>
+                            </div>
+                        </div>
+                        <a href="{{ path('admin_sessions') }}" class="btn btn-primary w-100 mt-2">
+                            <i class="bx bx-show me-1"></i>View Sessions
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card bg-light border-0 shadow-sm h-100">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <span class="d-flex align-items-center justify-content-center rounded-circle bg-success text-white" style="width:40px;height:40px;"><i class="bx bx-plus-circle fs-5"></i></span>
+                            <div>
+                                <h6 class="mb-0">Add New Session</h6>
+                                <small>Create a new course session</small>
+                            </div>
+                        </div>
+                        <a href="{{ path('admin_session_new') }}" class="btn btn-success w-100 mt-2">
+                            <i class="bx bx-plus me-1"></i>Create Session
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card bg-light border-0 shadow-sm h-100">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <span class="d-flex align-items-center justify-content-center rounded-circle bg-info text-white" style="width:40px;height:40px;"><i class="bx bx-book-add fs-5"></i></span>
+                            <div>
+                                <h6 class="mb-0">Add New Course</h6>
+                                <small>Add a new course to the platform</small>
+                            </div>
+                        </div>
+                        <a href="#" class="btn btn-info w-100 mt-2 disabled">
+                            <i class="bx bx-plus me-1"></i>Add Course
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Sessions Table -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Upcoming Sessions</h5>
+                <a href="{{ path('admin_sessions') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Course</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Capacity</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set now = "now"|date('Y-m-d H:i:s') %}
+                            {% set upcoming = sessions|filter(s => s.date > now)|slice(0, 5) %}
+                            {% for session in upcoming %}
+                            <tr>
+                                <td>{{ session.course.title }}</td>
+                                <td>{{ session.date|date('Y-m-d') }}</td>
+                                <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                <td>{{ session.capacity }}</td>
+                                <td>
+                                    {% if session.date < now %}
+                                        <span class="badge bg-label-danger">Expired</span>
+                                    {% else %}
+                                        <span class="badge bg-label-success">Upcoming</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No upcoming sessions</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

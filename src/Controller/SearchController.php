@@ -18,10 +18,15 @@ class SearchController extends AbstractController
         $query = $request->query->get('q', '');
         $categories = $entityManager->getRepository(Category::class)->findAll();
 
+        $sort = $request->query->get('sort', 'title_asc');
+        $page = max(1, (int)$request->query->get('page', 1));
+        $limit = 9;
+        $offset = ($page - 1) * $limit;
+
         if (empty($query)) {
-            $courses = $entityManager->getRepository(Course::class)->findAll();
+            $allCourses = $entityManager->getRepository(Course::class)->findAll();
         } else {
-            $courses = $entityManager->getRepository(Course::class)
+            $allCourses = $entityManager->getRepository(Course::class)
                 ->createQueryBuilder('c')
                 ->where('c.title LIKE :query')
                 ->orWhere('c.description LIKE :query')
@@ -30,10 +35,27 @@ class SearchController extends AbstractController
                 ->getResult();
         }
 
+        if ($sort === 'title_asc') {
+            usort($allCourses, fn($a, $b) => strcmp($a->getTitle(), $b->getTitle()));
+        } elseif ($sort === 'title_desc') {
+            usort($allCourses, fn($a, $b) => strcmp($b->getTitle(), $a->getTitle()));
+        } elseif ($sort === 'duration_asc') {
+            usort($allCourses, fn($a, $b) => $a->getDuration() <=> $b->getDuration());
+        } elseif ($sort === 'duration_desc') {
+            usort($allCourses, fn($a, $b) => $b->getDuration() <=> $a->getDuration());
+        }
+        $totalCourses = count($allCourses);
+        $totalPages = (int)ceil($totalCourses / $limit);
+        $courses = array_slice($allCourses, $offset, $limit);
+
         return $this->render('search/results.html.twig', [
             'query' => $query,
             'courses' => $courses,
             'categories' => $categories,
+            'selectedSort' => $sort,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalCourses' => $totalCourses,
         ]);
     }
 } 
