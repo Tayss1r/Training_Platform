@@ -17,6 +17,15 @@
             </div>
         </div>
 
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
         <div class="row">
             <!-- Course Main Content -->
             <div class="col-lg-8">
@@ -63,7 +72,7 @@
                                                 <td>Session {{ loop.index }}</td>
                                                 <td>{{ session.date|date('Y-m-d') }}</td>
                                                 <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
-                                                {% if session.capacity == 0 %}
+                                                {% if sessionsCapacity[session.id] <= 0 %}
                                                     <td>
                                                         <span class="badge bg-label-danger">Full</span>
                                                     </td>
@@ -77,9 +86,36 @@
                                                     </td>
                                                 {% endif %}
                                                 <td>
-                                                    <a href="#" class="btn btn-sm btn-outline-primary">
-                                                        <i class="bx bx-user-plus me-1"></i>Enroll
-                                                    </a>
+                                                    {% if not app.user %}
+                                                        <a href="{{ path('app_login') }}" class="btn btn-sm btn-outline-primary">
+                                                            <i class="bx bx-log-in me-1"></i>Login to Enroll
+                                                        </a>
+                                                    {% elseif sessionsCapacity[session.id] <= 0 %}
+                                                        <button class="btn btn-sm btn-outline-secondary" disabled>
+                                                            <i class="bx bx-x me-1"></i>Full
+                                                        </button>
+                                                    {% elseif session.date < date() %}
+                                                        <button class="btn btn-sm btn-outline-secondary" disabled>
+                                                            <i class="bx bx-x me-1"></i>Expired
+                                                        </button>
+                                                    {% else %}
+                                                        {% set isEnrolled = false %}
+                                                        {% for enrollment in app.user.enrollments %}
+                                                            {% if enrollment.session.id == session.id %}
+                                                                {% set isEnrolled = true %}
+                                                            {% endif %}
+                                                        {% endfor %}
+
+                                                        {% if isEnrolled %}
+                                                            <a href="{{ path('session_unenroll', {'id': session.id}) }}" class="btn btn-sm btn-outline-danger">
+                                                                <i class="bx bx-user-minus me-1"></i>Unenroll
+                                                            </a>
+                                                        {% else %}
+                                                            <a href="{{ path('session_enroll', {'id': session.id}) }}" class="btn btn-sm btn-outline-primary">
+                                                                <i class="bx bx-user-plus me-1"></i>Enroll
+                                                            </a>
+                                                        {% endif %}
+                                                    {% endif %}
                                                 </td>
                                             </tr>
                                         {% endfor %}
@@ -185,23 +221,23 @@
         try {
             copyBtn.disabled = true;
             copyBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i>Copying...';
-            
+
             shareLinkInput.select();
             shareLinkInput.setSelectionRange(0, 99999);
-            
+
             await navigator.clipboard.writeText(shareLinkInput.value);
-            
+
             copyConfirm.style.display = 'block';
             copyConfirm.style.opacity = '0';
             copyConfirm.style.transform = 'translateY(10px)';
-            
+
             // Trigger reflow
             copyConfirm.offsetHeight;
-            
+
             copyConfirm.style.transition = 'all 0.3s ease';
             copyConfirm.style.opacity = '1';
             copyConfirm.style.transform = 'translateY(0)';
-            
+
             setTimeout(() => {
                 copyConfirm.style.opacity = '0';
                 copyConfirm.style.transform = 'translateY(10px)';
@@ -221,10 +257,10 @@
     const linkedin = document.getElementById('share-linkedin');
     const whatsapp = document.getElementById('share-whatsapp');
     const email = document.getElementById('share-email');
-    
+
     const shareUrl = encodeURIComponent(window.location.href);
     const shareTitle = encodeURIComponent(document.title);
-    
+
     fb.onclick = function(e) {
         e.preventDefault();
         window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`, '_blank');
@@ -246,4 +282,4 @@
         window.location.href = `mailto:?subject=${shareTitle}&body=${shareUrl}`;
     }
     </script>
-{% endblock %} 
+{% endblock %}
