@@ -30,9 +30,18 @@ class CourseController extends AbstractController
     {
         $categories = $entityManager->getRepository(Category::class)->findAll();
 
+        // Calculate remaining capacity for each session
+        $sessionsCapacity = [];
+        foreach ($course->getSessions() as $session) {
+            $currentEnrollments = count($session->getEnrollments());
+            $remainingCapacity = $session->getCapacity() - $currentEnrollments;
+            $sessionsCapacity[$session->getId()] = $remainingCapacity;
+        }
+
         return $this->render('course/show.html.twig', [
             'course' => $course,
             'categories' => $categories,
+            'sessionsCapacity' => $sessionsCapacity,
         ]);
     }
 
