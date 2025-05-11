@@ -35,7 +35,7 @@ final class UserController extends AbstractController
                 $newFilename = $safeFilename . '-' . uniqid() . '.' . $photoFile->guessExtension();
 
                 try {
-                    $directory = $this->getParameter('imageDirectory');
+                    $directory = $this->getParameter('imageUserDirectory');
                     $photoFile->move($directory, $newFilename);
                     $user->setImage($newFilename);
                 } catch (\Exception $e) {

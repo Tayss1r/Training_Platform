@@ -1,19 +1,65 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Account Settings{% endblock %}
+
 {% block body %}
-    <form method="post" enctype="multipart/form-data">
-        {{ form_start(form) }}
-        {{ form_row(form.email) }}
-        {{ form_row(form.firstName) }}
-        {{ form_row(form.lastName) }}
-        {{ form_row(form.image) }}
-        <button class="btn btn-primary">Save</button>
-        {{ form_end(form) }}
-    </form>
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4">
+            <span class="text-muted fw-light">Account /</span> Profile
+        </h4>
 
-{% endblock %}
+        <div class="row">
+            <div class="col-md-12">
+            
 
-{% block title %}
+                <div class="card mb-4">
+                    <h5 class="card-header">Profile Details</h5>
+                    <div class="card-body">
+                        <div class="d-flex align-items-start align-items-sm-center gap-4">
+                        
+                            <div class="button-wrapper">
+                                {{ form_start(form, {'attr': {'class': 'row g-3'}}) }}
+                                <div class="mb-3">
+                                    {{ form_widget(form.image, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'accept': 'image/png, image/jpeg'
+                                        }
+                                    }) }}
+                                    {{ form_errors(form.image) }}
+                                    <small class="text-muted">Allowed JPG, GIF or PNG. Max size of 800K</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="{{ form.firstName.vars.id }}">First Name</label>
+                                    {{ form_widget(form.firstName, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.firstName) }}
+                                </div>
 
+                                <div class="mb-3">
+                                    <label class="form-label" for="{{ form.lastName.vars.id }}">Last Name</label>
+                                    {{ form_widget(form.lastName, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.lastName) }}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="{{ form.email.vars.id }}">E-mail</label>
+                                    {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.email) }}
+                                </div>
+
+                                <div class="mt-2">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="bx bx-save me-1"></i>Save changes
+                                    </button>
+                                    <a href="{{ path('home') }}" class="btn btn-outline-secondary">Cancel</a>
+                                </div>
+                                {{ form_end(form) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
