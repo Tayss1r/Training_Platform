@@ -27,6 +27,7 @@ class UserFixture extends Fixture
         $user->setFirstName('ahmed');
         $user->setLastName('melliti');
         $user->setRoles(['ROLE_USER']);
+        $user->setImage('1.png');
         $user->setPassword($this->passwordHasher->hashPassword($user, 'ahmed1'));
         $manager->persist($user);
 
@@ -36,6 +37,7 @@ class UserFixture extends Fixture
         $admin->setFirstName('tayssir');
         $admin->setLastName('ferhi');
         $admin->setRoles(['ROLE_ADMIN']);
+        $admin->setImage('5.png');
         $admin->setPassword($this->passwordHasher->hashPassword($admin, 'admin1'));
         $manager->persist($admin);
 
@@ -45,6 +47,7 @@ class UserFixture extends Fixture
         $instructor->setRoles(['ROLE_INSTRUCTOR']);
         $instructor->setFirstName('malek');
         $instructor->setLastName('khalifa');
+        $instructor->setImage('7.png');
         $instructor->setPassword($this->passwordHasher->hashPassword($instructor, 'mohamed1'));
         $manager->persist($instructor);
 
