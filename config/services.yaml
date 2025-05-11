@@ -6,6 +6,7 @@
 parameters:
     imageDirectory : '%kernel.project_dir%/public/assets/img/courses'
     syllabusDirectory: '%kernel.project_dir%/public/uploads/syllabuses'
+    imageUserDirectory: '%kernel.project_dir%/public/assets/img/avatars'
 
 services:
     # default configuration for services in *this* file

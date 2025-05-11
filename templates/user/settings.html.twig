@@ -1,7 +1,21 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
+    <form method="post">
+        {{ form_start(passwordForm) }}
+        {{ form_row(passwordForm.currentPassword) }}
+        {{ form_row(passwordForm.newPassword) }}
+        {{ form_row(passwordForm.confirmPassword) }}
+        <button class="btn btn-primary">Change Password</button>
+        {{ form_end(passwordForm) }}
+    </form>
 
+    <form method="post">
+        {{ form_start(deleteForm) }}
+        {{ form_row(deleteForm.confirm) }}
+        <button class="btn btn-danger">Delete Account</button>
+        {{ form_end(deleteForm) }}
+    </form>
 {% endblock %}
 
 {% block title %}
