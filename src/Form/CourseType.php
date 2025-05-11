@@ -43,6 +43,17 @@ class CourseType extends AbstractType
                     ])
                 ],
             ])
+            ->add('syllabus', FileType::class, [
+                'label' => 'Syllabus (PDF file)',
+                'mapped' => false,
+                'constraints' => [
+                    new File([
+                        'mimeTypes' => ['application/pdf'],
+                        'mimeTypesMessage' => 'Please upload a valid PDF file.',
+                    ])
+                ],
+                'required' => false,
+            ])
         ;
     }
 

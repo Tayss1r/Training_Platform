@@ -38,6 +38,9 @@ class Course
     #[ORM\OneToMany(targetEntity: Session::class, mappedBy: 'course')]
     private Collection $sessions;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $syllabus = null;
+
     public function __construct()
     {
         $this->sessions = new ArrayCollection();
@@ -134,6 +137,18 @@ class Course
                 $session->setCourse(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getSyllabus(): ?string
+    {
+        return $this->syllabus;
+    }
+
+    public function setSyllabus(?string $syllabus): static
+    {
+        $this->syllabus = $syllabus;
 
         return $this;
     }

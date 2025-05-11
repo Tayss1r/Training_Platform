@@ -200,6 +200,24 @@ class AdminController extends AbstractController
                     return $this->redirectToRoute('admin_course_edit', ['id' => $course->getId()]);
                 }
             }
+            // Handle PDF syllabus upload
+            $syllabusFile = $form->get('syllabus')->getData();
+
+            if ($syllabusFile) {
+                $originalFilename = pathinfo($syllabusFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$syllabusFile->guessExtension();
+
+                try {
+                    $directory = $this->getParameter('syllabusDirectory');
+                    $syllabusFile->move($directory, $newFilename);
+                    $course->setSyllabus($newFilename);
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'Error while uploading syllabus: ' . $e->getMessage());
+                    return $this->redirectToRoute('admin_course_edit', ['id' => $course->getId()]);
+                }
+
+            }
             $entityManager->persist($course);
             $entityManager->flush();
 
@@ -214,12 +232,47 @@ class AdminController extends AbstractController
     }
 
     #[Route('/admin/courses/{id}/edit', name: 'admin_course_edit')]
-    public function editCourse(Request $request, Course $course, EntityManagerInterface $entityManager): Response
+    public function editCourse(Request $request, Course $course, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
         $form = $this->createForm(CourseType::class, $course);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Handle syllabus upload
+            $syllabusFile = $form->get('syllabus')->getData();
+
+            if ($syllabusFile) {
+                $originalFilename = pathinfo($syllabusFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $syllabusFile->guessExtension();
+
+                try {
+                    $directory = $this->getParameter('syllabusDirectory');
+                    $syllabusFile->move($directory, $newFilename);
+                    $course->setSyllabus($newFilename);
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'Error while uploading syllabus: ' . $e->getMessage());
+                    return $this->redirectToRoute('admin_course_edit', ['id' => $course->getId()]);
+                }
+            }
+            $photoFile = $form->get('photo')->getData();
+
+            if ($photoFile) {
+                $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$photoFile->guessExtension();
+
+                try {
+                    $directory = $this->getParameter('imageDirectory');
+                    $photoFile->move($directory, $newFilename);
+
+                    $course->setImage($newFilename);
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'Error while uploading : ' . $e->getMessage());
+                    return $this->redirectToRoute('admin_course_edit', ['id' => $course->getId()]);
+                }
+            }
+
             $entityManager->flush();
 
             $this->addFlash('success', 'Course updated successfully.');
@@ -231,6 +284,7 @@ class AdminController extends AbstractController
             'title' => 'Edit Course'
         ]);
     }
+
 
     #[Route('/admin/courses/{id}/delete', name: 'admin_course_delete', methods: ['POST'])]
     public function deleteCourse(Course $course, EntityManagerInterface $entityManager): Response
