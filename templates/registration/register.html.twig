@@ -78,7 +78,7 @@
                             <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
                         {% endfor %}
 
-                        {{ form_start(registrationForm) }}
+                        {{ form_start(registrationForm, {'attr': {'enctype': 'multipart/form-data'}}) }}
                         <div class="mb-3">
                             {{ form_label(registrationForm.firstName, null, {'label_attr': {'class': 'form-label'}}) }}
                             {{ form_widget(registrationForm.firstName, {'attr': {'class': 'form-control', 'placeholder': 'Enter your first name'}}) }}
@@ -93,6 +93,13 @@
                             {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'form-label'}}) }}
                             {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control', 'placeholder': 'Enter your email'}}) }}
                             {{ form_errors(registrationForm.email) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.image, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.image, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(registrationForm.image) }}
+                            <small class="text-muted">Upload a profile picture (JPEG, PNG or GIF, max 1MB)</small>
                         </div>
 
                         <div class="mb-3 form-password-toggle">
