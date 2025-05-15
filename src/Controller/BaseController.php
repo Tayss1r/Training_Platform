@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Announcement;
 use App\Entity\Category;
+use App\Entity\User;
 use App\Service\SettingsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -35,12 +37,36 @@ class BaseController extends AbstractController
         $appearanceSettings = $this->settingsService->getByCategory('appearance');
         $maintenanceSettings = $this->settingsService->getByCategory('maintenance');
 
+        // Get unread announcements count for students
+        $unreadAnnouncementsCount = 0;
+        if ($this->isGranted('ROLE_USER') && !$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_INSTRUCTOR')) {
+            $unreadAnnouncementsCount = $this->getUnreadAnnouncementsCount();
+        }
+
         return [
             'categories' => $categories,
             'generalSettings' => $generalSettings,
             'appearanceSettings' => $appearanceSettings,
             'maintenanceSettings' => $maintenanceSettings,
+            'unreadAnnouncementsCount' => $unreadAnnouncementsCount,
         ];
+    }
+
+    /**
+     * Get the count of unread announcements for the current user
+     */
+    protected function getUnreadAnnouncementsCount(): int
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!$user) {
+            return 0;
+        }
+
+        $announcementRepository = $this->entityManager->getRepository(Announcement::class);
+        $unreadAnnouncements = $announcementRepository->findUnreadByUser($user);
+
+        return count($unreadAnnouncements);
     }
 
     /**

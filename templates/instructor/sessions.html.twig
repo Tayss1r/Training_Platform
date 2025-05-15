@@ -97,7 +97,7 @@
                                                             <i class="bx bx-file me-1"></i>Manage Materials
                                                         </a>
                                                         <div class="dropdown-divider"></div>
-                                                        <a class="dropdown-item" href="#">
+                                                        <a class="dropdown-item send-announcement-btn" href="#" data-session-id="{{ session.id }}" data-session-title="{{ session.course.title }}" data-student-count="{{ session.enrollments|length }}">
                                                             <i class="bx bx-message-square-dots me-1"></i>Send Announcement
                                                         </a>
                                                         <a class="dropdown-item edit-session-btn" href="#" data-session-id="{{ session.id }}">
@@ -530,6 +530,54 @@
         </div>
     </div>
 
+    <!-- Send Announcement Modal -->
+    <div class="modal fade instructor-modal" id="announcementModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send Announcement to Students</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="announcementForm" class="instructor-form">
+                        <input type="hidden" id="announcementSessionId" name="sessionId">
+
+                        <div class="mb-3">
+                            <label class="form-label">Session</label>
+                            <input type="text" class="form-control" id="announcementSessionName" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Subject</label>
+                            <input type="text" class="form-control" name="subject" placeholder="Enter announcement subject" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea class="form-control" name="message" rows="5" placeholder="Enter your announcement message" required></textarea>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="sendEmail" name="sendEmail" checked>
+                            <label class="form-check-label" for="sendEmail">
+                                Also send this announcement as an email to enrolled students
+                            </label>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bx bx-info-circle me-1"></i>
+                            This announcement will be sent to <strong id="studentCountText">0</strong> student(s) enrolled in this session.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="sendAnnouncementBtn">Send Announcement</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ asset('js/custom-toast.js') }}"></script>
     <script>
         // Function to show notifications using our custom toast system
@@ -941,6 +989,73 @@
             // New Session form validation
             if (newSessionForm) {
                 // Add validation logic here if needed
+            }
+
+            // Send Announcement functionality
+            const announcementButtons = document.querySelectorAll('.send-announcement-btn');
+            const announcementForm = document.getElementById('announcementForm');
+            const sendAnnouncementBtn = document.getElementById('sendAnnouncementBtn');
+
+            if (announcementButtons.length > 0 && announcementForm && sendAnnouncementBtn) {
+                announcementButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+
+                        const sessionId = this.getAttribute('data-session-id');
+                        const sessionTitle = this.getAttribute('data-session-title');
+                        const studentCount = this.getAttribute('data-student-count');
+
+                        // Set form values
+                        document.getElementById('announcementSessionId').value = sessionId;
+                        document.getElementById('announcementSessionName').value = sessionTitle;
+                        document.getElementById('studentCountText').textContent = studentCount;
+
+                        // Clear previous form values
+                        announcementForm.querySelector('input[name="subject"]').value = '';
+                        announcementForm.querySelector('textarea[name="message"]').value = '';
+
+                        // Show the modal
+                        const modal = new bootstrap.Modal(document.getElementById('announcementModal'));
+                        modal.show();
+                    });
+                });
+
+                // Handle send announcement button click
+                sendAnnouncementBtn.addEventListener('click', function() {
+                    // First validate the form
+                    const isValid = validateForm(announcementForm);
+                    if (!isValid) {
+                        return;
+                    }
+
+                    // Get form data
+                    const formData = new FormData(announcementForm);
+                    const sessionId = document.getElementById('announcementSessionId').value;
+
+                    // Send AJAX request
+                    fetch(`{{ path('instructor_session_announcement', {'id': 'SESSION_ID'}) }}`.replace('SESSION_ID', sessionId), {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            showNotification('success', data.message);
+
+                            // Close the modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('announcementModal'));
+                            modal.hide();
+                        } else {
+                            // Show error message
+                            showNotification('error', data.message || 'An error occurred while sending the announcement');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('error', 'An error occurred while sending the announcement');
+                    });
+                });
             }
 
             // Form validation function

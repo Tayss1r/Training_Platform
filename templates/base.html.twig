@@ -284,7 +284,17 @@
                     <!-- /Search -->
 
                     <ul class="navbar-nav flex-row align-items-center ms-auto">
-                        <!-- Place this tag where you want the button to render. -->
+                        <!-- Announcements -->
+                        {% if is_granted('ROLE_USER') and not is_granted('ROLE_ADMIN') and not is_granted('ROLE_INSTRUCTOR') %}
+                        <li class="nav-item me-3">
+                            <a class="nav-link" href="{{ path('student_announcements') }}">
+                                <i class="bx bx-bell fs-4"></i>
+                                <span id="announcementUnreadBadge" class="badge rounded-pill bg-danger badge-notifications {% if unreadAnnouncementsCount is not defined or unreadAnnouncementsCount == 0 %}d-none{% endif %}">
+                                    {{ unreadAnnouncementsCount|default(0) }}
+                                </span>
+                            </a>
+                        </li>
+                        {% endif %}
 
                         <!-- User -->
                         <li class="nav-item navbar-dropdown dropdown-user dropdown">
@@ -420,6 +430,26 @@
                                         </li>
                                     {% endif %}
 
+                                    {% if is_granted('ROLE_USER') and not is_granted('ROLE_ADMIN') and not is_granted('ROLE_INSTRUCTOR') %}
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('student_announcements') }}">
+                                                <i class="bx bx-bell me-2"></i>
+                                                <span class="align-middle">Announcements</span>
+                                                {% if unreadAnnouncementsCount is defined and unreadAnnouncementsCount > 0 %}
+                                                    <span class="badge rounded-pill bg-danger ms-2">{{ unreadAnnouncementsCount }}</span>
+                                                {% endif %}
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('my_enrollments') }}">
+                                                <i class="bx bx-book-open me-2"></i>
+                                                <span class="align-middle">My Enrollments</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <div class="dropdown-divider"></div>
+                                        </li>
+                                    {% endif %}
                                     <li>
                                         <a class="dropdown-item" href="{{ path('app_user_profile') }}">
                                             <i class="bx bx-user me-2"></i>

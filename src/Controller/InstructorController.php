@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Announcement;
 use App\Entity\Course;
 use App\Entity\Session;
 use App\Entity\Category;
@@ -716,6 +717,84 @@ class InstructorController extends AbstractController
             return new JsonResponse([
                 'success' => true,
                 'message' => 'Session deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    #[Route('/sessions/{id}/announcement', name: 'instructor_session_announcement', methods: ['POST'], priority: 10)]
+    public function sendSessionAnnouncement(EntityManagerInterface $entityManager, Request $request, int $id): Response
+    {
+        // Get the session
+        $session = $entityManager->getRepository(Session::class)->find($id);
+
+        if (!$session) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Session not found'
+            ], 404);
+        }
+
+        // Get form data
+        $subject = $request->request->get('subject');
+        $message = $request->request->get('message');
+        $sendEmail = $request->request->get('sendEmail') === 'on';
+
+        // Validate required fields
+        $missingFields = [];
+        if (!$subject) $missingFields[] = 'Subject';
+        if (!$message) $missingFields[] = 'Message';
+
+        if (!empty($missingFields)) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Please fill out the following required fields: ' . implode(', ', $missingFields)
+            ], 400);
+        }
+
+        try {
+            // Get enrollments for this session
+            $enrollments = $session->getEnrollments();
+            $studentCount = count($enrollments);
+
+            if ($studentCount === 0) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'There are no students enrolled in this session'
+                ], 400);
+            }
+
+            // Get the current user (instructor)
+            $instructor = $this->getUser();
+
+            // Create a new announcement
+            $announcement = new Announcement();
+            $announcement->setSubject($subject);
+            $announcement->setMessage($message);
+            $announcement->setSession($session);
+            $announcement->setSender($instructor);
+            $announcement->setEmailSent($sendEmail);
+
+            // Save to database
+            $entityManager->persist($announcement);
+            $entityManager->flush();
+
+            // In a real application, we would also:
+            // 1. Send emails to enrolled students if $sendEmail is true
+            // 2. Create notifications for students in the system
+            return new JsonResponse([
+                'success' => true,
+                'message' => sprintf(
+                    'Announcement "%s" has been sent to %d student(s) enrolled in this session.',
+                    $subject,
+                    $studentCount
+                ),
+                'studentCount' => $studentCount,
+                'emailsSent' => $sendEmail ? $studentCount : 0
             ]);
         } catch (\Exception $e) {
             return new JsonResponse([

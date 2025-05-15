@@ -52,9 +52,13 @@ class Session
     #[ORM\OneToMany(targetEntity: Enrollment::class, mappedBy: 'session')]
     private Collection $enrollments;
 
+    #[ORM\OneToMany(mappedBy: 'session', targetEntity: Announcement::class, orphanRemoval: true)]
+    private Collection $announcements;
+
     public function __construct()
     {
         $this->enrollments = new ArrayCollection();
+        $this->announcements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -261,6 +265,36 @@ class Session
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Announcement>
+     */
+    public function getAnnouncements(): Collection
+    {
+        return $this->announcements;
+    }
+
+    public function addAnnouncement(Announcement $announcement): static
+    {
+        if (!$this->announcements->contains($announcement)) {
+            $this->announcements->add($announcement);
+            $announcement->setSession($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAnnouncement(Announcement $announcement): static
+    {
+        if ($this->announcements->removeElement($announcement)) {
+            // set the owning side to null (unless already changed)
+            if ($announcement->getSession() === $this) {
+                $announcement->setSession(null);
+            }
+        }
 
         return $this;
     }
