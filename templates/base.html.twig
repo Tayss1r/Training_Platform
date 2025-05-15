@@ -24,7 +24,7 @@
     <meta
             name="viewport"
             content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
-    />  
+    />
     {% block favTitle %}
         <title>Forminy</title>
     {% endblock %}
@@ -44,11 +44,11 @@
 
     <!-- Icons -->
     <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}" />
-    
+
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('vendor/css/core.css') }}" class="template-customizer-core-css" />
     <link rel="stylesheet" href="{{ asset('vendor/css/theme-default.css') }}" class="template-customizer-theme-css" />
-    
+
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{{ asset('vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
 
@@ -243,7 +243,11 @@
                         <li class="nav-item navbar-dropdown dropdown-user dropdown">
                             <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                                 <div class="avatar avatar-online">
-                                    <img src="{{ asset('assets/img/avatars/1.png') }}" alt class="w-px-40 h-auto rounded-circle" />
+                                    {% if app.user %}
+                                        <img src="{{ asset('assets/img/avatars/' ~ app.user.image) }}" alt="User Avatar" class="w-px-40 h-auto rounded-circle" />
+                                    {% else %}
+                                        <img src="{{ asset('assets/img/avatars/6.png') }}" alt="Default Avatar" class="w-px-40 h-auto rounded-circle" />
+                                    {% endif %}
                                 </div>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
@@ -252,7 +256,11 @@
                                         <div class="d-flex">
                                             <div class="flex-shrink-0 me-3">
                                                 <div class="avatar avatar-online">
-                                                    <img src="{{ asset('assets/img/avatars/1.png') }}" alt class="w-px-40 h-auto rounded-circle" />
+                                                    {% if app.user %}
+                                                        <img src="{{ asset('assets/img/avatars/' ~ app.user.image) }}" alt="User Avatar" class="w-px-40 h-auto rounded-circle" />
+                                                    {% else %}
+                                                        <img src="{{ asset('assets/img/avatars/6.png') }}" alt="Default Avatar" class="w-px-40 h-auto rounded-circle" />
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                             <div class="flex-grow-1">
@@ -280,24 +288,21 @@
                                 </li>
                                 {% if app.user %}
                                     <li>
-                                        <a class="dropdown-item" href="#">
+                                        <a class="dropdown-item" href="{{ path('my_enrollments') }}">
+                                            <i class="bx bx-calendar-check me-2"></i>
+                                            <span class="align-middle">My Enrollments</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('app_user_profile') }}">
                                             <i class="bx bx-user me-2"></i>
                                             <span class="align-middle">My Profile</span>
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="#">
+                                        <a class="dropdown-item" href="{{ path('app_user_settings') }}">
                                             <i class="bx bx-cog me-2"></i>
                                             <span class="align-middle">Settings</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#">
-                                            <span class="d-flex align-items-center align-middle">
-                                                <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
-                                                <span class="flex-grow-1 align-middle">Billing</span>
-                                                <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
-                                            </span>
                                         </a>
                                     </li>
                                     <li>
