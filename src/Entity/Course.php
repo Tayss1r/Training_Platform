@@ -47,10 +47,14 @@ class Course
     #[ORM\OneToMany(targetEntity: Material::class, mappedBy: 'course', orphanRemoval: true)]
     private Collection $materials;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $createdAt = null;
+
     public function __construct()
     {
         $this->sessions = new ArrayCollection();
         $this->materials = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -186,6 +190,18 @@ class Course
                 $material->setCourse(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }
