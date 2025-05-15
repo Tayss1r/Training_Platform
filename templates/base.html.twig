@@ -63,6 +63,8 @@
     <script src="{{ asset('vendor/js/config.js') }}"></script>
 
     <link rel="stylesheet" href="{{ asset('assets/styles/app.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/styles/instructor.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}" />
 </head>
 
 <body>
@@ -197,6 +199,42 @@
                         </a>
                     </li>
                 {% endif %}
+
+                {% if is_granted('ROLE_INSTRUCTOR') %}
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">Instructor</span>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('instructor_dashboard') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <div data-i18n="Analytics">Dashboard</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('instructor_sessions') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                            <div data-i18n="Analytics">My Sessions</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('instructor_students') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-user-check"></i>
+                            <div data-i18n="Analytics">My Students</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('instructor_materials') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-file"></i>
+                            <div data-i18n="Analytics">Course Materials</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('instructor_analytics') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
+                            <div data-i18n="Analytics">Analytics</div>
+                        </a>
+                    </li>
+                {% endif %}
             </ul>
 
         </aside>
@@ -269,6 +307,8 @@
                                                     <small class="text-muted">
                                                         {% if 'ROLE_ADMIN' in app.user.roles %}
                                                             Admin
+                                                        {% elseif 'ROLE_INSTRUCTOR' in app.user.roles %}
+                                                            Instructor
                                                         {% elseif 'ROLE_USER' in app.user.roles %}
                                                             User
                                                         {% else %}
@@ -287,6 +327,41 @@
                                     <div class="dropdown-divider"></div>
                                 </li>
                                 {% if app.user %}
+                                    {% if is_granted('ROLE_INSTRUCTOR') %}
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('instructor_dashboard') }}">
+                                                <i class="bx bx-home-circle me-2"></i>
+                                                <span class="align-middle">Instructor Dashboard</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('instructor_sessions') }}">
+                                                <i class="bx bx-calendar-check me-2"></i>
+                                                <span class="align-middle">My Teaching Sessions</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('instructor_students') }}">
+                                                <i class="bx bx-user-check me-2"></i>
+                                                <span class="align-middle">My Students</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('instructor_materials') }}">
+                                                <i class="bx bx-file me-2"></i>
+                                                <span class="align-middle">Course Materials</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('instructor_analytics') }}">
+                                                <i class="bx bx-bar-chart-alt-2 me-2"></i>
+                                                <span class="align-middle">Analytics</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <div class="dropdown-divider"></div>
+                                        </li>
+                                    {% endif %}
                                     <li>
                                         <a class="dropdown-item" href="{{ path('my_enrollments') }}">
                                             <i class="bx bx-calendar-check me-2"></i>

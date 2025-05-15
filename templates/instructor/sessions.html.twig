@@ -1,0 +1,1020 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Instructor Sessions{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        #notification-container {
+            max-width: 350px;
+        }
+
+        #notification-container .alert {
+            margin-bottom: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid;
+        }
+
+        #notification-container .alert-success {
+            border-left-color: #28a745;
+        }
+
+        #notification-container .alert-danger {
+            border-left-color: #dc3545;
+        }
+
+        .fade {
+            transition: opacity 0.3s linear;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('instructor_dashboard') }}">Instructor</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Sessions</li>
+            </ol>
+        </nav>
+
+        <div class="card instructor-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">My Teaching Sessions</h5>
+                <div>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                        <i class="bx bx-filter-alt me-1"></i>Filter
+                    </button>
+                    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#newSessionModal">
+                        <i class="bx bx-plus me-1"></i>New Session
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Session Status Tabs -->
+                <ul class="nav nav-tabs instructor-tabs mb-3" id="sessionTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-sessions" type="button" role="tab" aria-controls="all-sessions" aria-selected="true">All Sessions</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming-sessions" type="button" role="tab" aria-controls="upcoming-sessions" aria-selected="false">Upcoming</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="inprogress-tab" data-bs-toggle="tab" data-bs-target="#inprogress-sessions" type="button" role="tab" aria-controls="inprogress-sessions" aria-selected="false">In Progress</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed-sessions" type="button" role="tab" aria-controls="completed-sessions" aria-selected="false">Completed</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="sessionTabsContent">
+                    <div class="tab-pane fade show active" id="all-sessions" role="tabpanel" aria-labelledby="all-tab">
+                        <div class="table-responsive">
+                            <table class="table instructor-table">
+                                <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Capacity</th>
+                                        <th>Enrolled</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for session in sessions %}
+                                        <tr data-course-id="{{ session.course.id }}">
+                                            <td><strong>{{ session.course.title }}</strong></td>
+                                            <td>{{ session.date|date('Y-m-d') }}</td>
+                                            <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                            <td>{{ session.capacity }}</td>
+                                            <td>{{ session.enrollments|length }}</td>
+                                            <td>
+                                                {% set now = "now"|date('Y-m-d') %}
+                                                {% if session.date|date('Y-m-d') > now %}
+                                                    <span class="badge-instructor badge-success">Upcoming</span>
+                                                {% elseif session.date|date('Y-m-d') < now %}
+                                                    <span class="badge-instructor badge-info">Completed</span>
+                                                {% else %}
+                                                    <span class="badge-instructor badge-warning">In Progress</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item" href="{{ path('instructor_session_details', {'id': session.id}) }}">
+                                                            <i class="bx bx-info-circle me-1"></i>View Details
+                                                        </a>
+                                                        <a class="dropdown-item" href="{{ path('instructor_session_students', {'id': session.id}) }}">
+                                                            <i class="bx bx-user-check me-1"></i>View Students
+                                                        </a>
+                                                        <a class="dropdown-item" href="{{ path('instructor_session_progress', {'id': session.id}) }}">
+                                                            <i class="bx bx-bar-chart-alt-2 me-1"></i>View Progress
+                                                        </a>
+                                                        <a class="dropdown-item" href="#">
+                                                            <i class="bx bx-file me-1"></i>Manage Materials
+                                                        </a>
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item" href="#">
+                                                            <i class="bx bx-message-square-dots me-1"></i>Send Announcement
+                                                        </a>
+                                                        <a class="dropdown-item edit-session-btn" href="#" data-session-id="{{ session.id }}">
+                                                            <i class="bx bx-edit me-1"></i>Edit Session
+                                                        </a>
+                                                        <a class="dropdown-item text-danger delete-session-btn" href="#" data-session-id="{{ session.id }}">
+                                                            <i class="bx bx-trash me-1"></i>Cancel Session
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="7" class="text-center">No sessions found</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="upcoming-sessions" role="tabpanel" aria-labelledby="upcoming-tab">
+                        {% if upcomingSessions|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table instructor-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Course</th>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Capacity</th>
+                                            <th>Enrolled</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for session in upcomingSessions %}
+                                            <tr data-course-id="{{ session.course.id }}">
+                                                <td><strong>{{ session.course.title }}</strong></td>
+                                                <td>{{ session.date|date('Y-m-d') }}</td>
+                                                <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                                <td>{{ session.capacity }}</td>
+                                                <td>{{ session.enrollments|length }}</td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu">
+                                                            <a class="dropdown-item" href="{{ path('instructor_session_details', {'id': session.id}) }}">
+                                                                <i class="bx bx-info-circle me-1"></i>View Details
+                                                            </a>
+                                                            <a class="dropdown-item" href="{{ path('instructor_session_students', {'id': session.id}) }}">
+                                                                <i class="bx bx-user-check me-1"></i>View Students
+                                                            </a>
+                                                            <a class="dropdown-item" href="{{ path('instructor_session_progress', {'id': session.id}) }}">
+                                                                <i class="bx bx-bar-chart-alt-2 me-1"></i>View Progress
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <i class="bx bx-file me-1"></i>Manage Materials
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="bx bx-info-circle me-1"></i>
+                                No upcoming sessions found
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="tab-pane fade" id="inprogress-sessions" role="tabpanel" aria-labelledby="inprogress-tab">
+                        {% if inProgressSessions|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table instructor-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Course</th>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Capacity</th>
+                                            <th>Enrolled</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for session in inProgressSessions %}
+                                            <tr data-course-id="{{ session.course.id }}">
+                                                <td><strong>{{ session.course.title }}</strong></td>
+                                                <td>{{ session.date|date('Y-m-d') }}</td>
+                                                <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                                <td>{{ session.capacity }}</td>
+                                                <td>{{ session.enrollments|length }}</td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu">
+                                                            <a class="dropdown-item" href="{{ path('instructor_session_details', {'id': session.id}) }}">
+                                                                <i class="bx bx-info-circle me-1"></i>View Details
+                                                            </a>
+                                                            <a class="dropdown-item" href="{{ path('instructor_session_students', {'id': session.id}) }}">
+                                                                <i class="bx bx-user-check me-1"></i>View Students
+                                                            </a>
+                                                            <a class="dropdown-item" href="{{ path('instructor_session_progress', {'id': session.id}) }}">
+                                                                <i class="bx bx-bar-chart-alt-2 me-1"></i>View Progress
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <i class="bx bx-file me-1"></i>Manage Materials
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="bx bx-info-circle me-1"></i>
+                                No in-progress sessions found
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="tab-pane fade" id="completed-sessions" role="tabpanel" aria-labelledby="completed-tab">
+                        {% if completedSessions|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table instructor-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Course</th>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Capacity</th>
+                                            <th>Enrolled</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for session in completedSessions %}
+                                            <tr data-course-id="{{ session.course.id }}">
+                                                <td><strong>{{ session.course.title }}</strong></td>
+                                                <td>{{ session.date|date('Y-m-d') }}</td>
+                                                <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                                <td>{{ session.capacity }}</td>
+                                                <td>{{ session.enrollments|length }}</td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu">
+                                                            <a class="dropdown-item" href="{{ path('instructor_session_details', {'id': session.id}) }}">
+                                                                <i class="bx bx-info-circle me-1"></i>View Details
+                                                            </a>
+                                                            <a class="dropdown-item" href="{{ path('instructor_session_students', {'id': session.id}) }}">
+                                                                <i class="bx bx-user-check me-1"></i>View Students
+                                                            </a>
+                                                            <a class="dropdown-item" href="{{ path('instructor_session_progress', {'id': session.id}) }}">
+                                                                <i class="bx bx-bar-chart-alt-2 me-1"></i>View Progress
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <i class="bx bx-file me-1"></i>Download Report
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="bx bx-info-circle me-1"></i>
+                                No completed sessions found
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Modal -->
+    <div class="modal fade instructor-modal" id="filterModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Filter Sessions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="filterForm" class="instructor-form">
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                <option value="">All</option>
+                                <option value="upcoming">Upcoming</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Course</label>
+                            <select class="form-select" name="course">
+                                <option value="">All Courses</option>
+                                {% for course in courses %}
+                                    <option value="{{ course.id }}">{{ course.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Date Range</label>
+                            <div class="input-group">
+                                <input type="date" class="form-control" name="startDate" placeholder="Start Date">
+                                <span class="input-group-text">to</span>
+                                <input type="date" class="form-control" name="endDate" placeholder="End Date">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="applyFilters">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Session Modal -->
+    <div class="modal fade instructor-modal" id="newSessionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Session</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newSessionForm" class="instructor-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Course</label>
+                                <select class="form-select" name="course" required>
+                                    <option value="">Select Course</option>
+                                    {% for course in courses %}
+                                        <option value="{{ course.id }}">{{ course.title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Location</label>
+                                <select class="form-select" name="location" required>
+                                    <option value="">Select Location</option>
+                                    <option value="online">Online</option>
+                                    <option value="classroom_a">Classroom A</option>
+                                    <option value="classroom_b">Classroom B</option>
+                                    <option value="lab_1">Computer Lab 1</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Session Date</label>
+                                <input type="date" class="form-control" name="date" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Time</label>
+                                <input type="time" class="form-control" name="startTime" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">End Time</label>
+                                <input type="time" class="form-control" name="endTime" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Capacity</label>
+                                <input type="number" class="form-control" name="capacity" min="1" max="100" value="20" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Session Type</label>
+                                <select class="form-select" name="sessionType" required>
+                                    <option value="regular">Regular</option>
+                                    <option value="intensive">Intensive</option>
+                                    <option value="weekend">Weekend</option>
+                                    <option value="evening">Evening</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3" placeholder="Additional information about this session"></textarea>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="notifyStudents" name="notifyStudents">
+                            <label class="form-check-label" for="notifyStudents">
+                                Notify enrolled students about this new session
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="createSessionBtn">Create Session</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+    <!-- Edit Session Modal -->
+    <div class="modal fade instructor-modal" id="editSessionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Session</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editSessionForm" class="instructor-form">
+                        <input type="hidden" id="editSessionId" name="sessionId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Course</label>
+                                <select class="form-select" name="course" required>
+                                    <option value="">Select Course</option>
+                                    {% for course in courses %}
+                                        <option value="{{ course.id }}">{{ course.title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Location</label>
+                                <select class="form-select" name="location" required>
+                                    <option value="">Select Location</option>
+                                    <option value="online">Online</option>
+                                    <option value="classroom_a">Classroom A</option>
+                                    <option value="classroom_b">Classroom B</option>
+                                    <option value="lab_1">Computer Lab 1</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Session Date</label>
+                                <input type="date" class="form-control" name="date" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Time</label>
+                                <input type="time" class="form-control" name="startTime" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">End Time</label>
+                                <input type="time" class="form-control" name="endTime" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Capacity</label>
+                                <input type="number" class="form-control" name="capacity" min="1" max="100" value="20" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Session Type</label>
+                                <select class="form-select" name="sessionType" required>
+                                    <option value="regular">Regular</option>
+                                    <option value="intensive">Intensive</option>
+                                    <option value="weekend">Weekend</option>
+                                    <option value="evening">Evening</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3" placeholder="Additional information about this session"></textarea>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="editNotifyStudents" name="notifyStudents">
+                            <label class="form-check-label" for="editNotifyStudents">
+                                Notify enrolled students about these changes
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="updateSessionBtn">Update Session</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade instructor-modal" id="deleteSessionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Session Cancellation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to cancel this session?</p>
+                    <p id="deleteSessionWarning" class="text-danger d-none">This session has <span id="enrollmentCount"></span> enrolled students. They will be notified about the cancellation.</p>
+                    <input type="hidden" id="deleteSessionId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">No, Keep Session</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes, Cancel Session</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to show notifications
+        function showNotification(type, message) {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+
+            // Set notification styles based on type
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            notification.role = 'alert';
+
+            // Add notification content
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+
+            // Add to container
+            container.appendChild(notification);
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    container.removeChild(notification);
+                }, 300);
+            }, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter functionality
+            const filterForm = document.getElementById('filterForm');
+            const applyFiltersBtn = document.getElementById('applyFilters');
+
+            if (applyFiltersBtn) {
+                applyFiltersBtn.addEventListener('click', function() {
+                    // Get filter values
+                    const status = filterForm.querySelector('select[name="status"]')?.value || '';
+                    const courseId = filterForm.querySelector('select[name="course"]')?.value || '';
+                    const startDate = filterForm.querySelector('input[name="startDate"]')?.value || '';
+                    const endDate = filterForm.querySelector('input[name="endDate"]')?.value || '';
+
+                    // Debug log
+                    console.log('Applying filters:', { status, courseId, startDate, endDate });
+
+                    // Apply filters to the table
+                    filterSessions(status, courseId, startDate, endDate);
+
+                    // Close the modal
+                    const filterModal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
+                    filterModal.hide();
+                });
+            }
+
+            // Function to filter sessions
+            function filterSessions(status, courseId, startDate, endDate) {
+                // Get all session rows from all tabs
+                const allSessionsTab = document.getElementById('all-sessions');
+                const upcomingSessionsTab = document.getElementById('upcoming-sessions');
+                const inProgressSessionsTab = document.getElementById('inprogress-sessions');
+                const completedSessionsTab = document.getElementById('completed-sessions');
+
+                // Switch to the "All Sessions" tab to show filtered results
+                const allTabButton = document.getElementById('all-tab');
+                if (allTabButton) {
+                    allTabButton.click();
+                }
+
+                const rows = allSessionsTab.querySelectorAll('tbody tr');
+
+                // Show loading indicator
+                const loadingIndicator = document.createElement('div');
+                loadingIndicator.className = 'text-center py-3';
+                loadingIndicator.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+
+                allSessionsTab.querySelector('.table-responsive').appendChild(loadingIndicator);
+
+                // Hide all rows temporarily
+                rows.forEach(row => {
+                    row.style.display = 'none';
+                });
+
+                // Simulate API call delay
+                setTimeout(function() {
+                    // Remove loading indicator
+                    loadingIndicator.remove();
+
+                    // Filter logic
+                    rows.forEach(row => {
+                        let showRow = true;
+
+                        // Filter by status
+                        if (status) {
+                            const statusCell = row.querySelector('td:nth-child(6)');
+                            if (statusCell) {
+                                const statusText = statusCell.textContent.trim().toLowerCase();
+                                console.log('Status text:', statusText, 'Looking for:', status.toLowerCase());
+
+                                // Map status values to what appears in the table
+                                let statusToMatch = status.toLowerCase();
+                                if (statusToMatch === 'in_progress') {
+                                    statusToMatch = 'in progress';
+                                }
+
+                                if (!statusText.includes(statusToMatch)) {
+                                    showRow = false;
+                                    console.log('Status mismatch, hiding row');
+                                } else {
+                                    console.log('Status match, showing row');
+                                }
+                            }
+                        }
+
+                        // Filter by course
+                        if (courseId && showRow) {
+                            // Get the course ID from the data attribute
+                            const courseId_num = parseInt(courseId);
+                            // Get the row's course ID from a data attribute
+                            const rowCourseId = parseInt(row.getAttribute('data-course-id'));
+
+                            console.log('Filtering course:', {
+                                courseId,
+                                courseId_num,
+                                rowCourseId,
+                                rowHTML: row.outerHTML.substring(0, 100)
+                            });
+
+                            // If we have both IDs, compare them directly
+                            if (!isNaN(courseId_num) && !isNaN(rowCourseId)) {
+                                if (courseId_num !== rowCourseId) {
+                                    showRow = false;
+                                    console.log('Course ID mismatch, hiding row');
+                                } else {
+                                    console.log('Course ID match, showing row');
+                                }
+                            } else {
+                                // Fallback to text comparison if data attributes aren't available
+                                const courseCell = row.querySelector('td:nth-child(1)');
+                                if (courseCell) {
+                                    console.log('Falling back to text comparison:', courseCell.textContent);
+                                    if (!courseCell.textContent.toLowerCase().includes(courseId.toLowerCase())) {
+                                        showRow = false;
+                                        console.log('Text does not match, hiding row');
+                                    } else {
+                                        console.log('Text matches, showing row');
+                                    }
+                                }
+                            }
+                        }
+
+                        // Filter by date range
+                        if ((startDate || endDate) && showRow) {
+                            const dateCell = row.querySelector('td:nth-child(2)');
+                            if (dateCell) {
+                                const sessionDate = new Date(dateCell.textContent.trim());
+
+                                if (startDate) {
+                                    const filterStartDate = new Date(startDate);
+                                    if (sessionDate < filterStartDate) {
+                                        showRow = false;
+                                    }
+                                }
+
+                                if (endDate && showRow) {
+                                    const filterEndDate = new Date(endDate);
+                                    if (sessionDate > filterEndDate) {
+                                        showRow = false;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Show or hide row based on filters
+                        row.style.display = showRow ? '' : 'none';
+                    });
+
+                    // Check if any rows are visible
+                    let visibleRows = false;
+                    rows.forEach(row => {
+                        if (row.style.display !== 'none') {
+                            visibleRows = true;
+                        }
+                    });
+
+                    // Show "No sessions found" message if no rows are visible
+                    const noSessionsRow = allSessionsTab.querySelector('tbody tr.no-sessions-row');
+                    if (!visibleRows) {
+                        if (!noSessionsRow) {
+                            const tbody = allSessionsTab.querySelector('tbody');
+                            const newRow = document.createElement('tr');
+                            newRow.className = 'no-sessions-row';
+                            newRow.innerHTML = '<td colspan="7" class="text-center">No sessions match the filter criteria</td>';
+                            tbody.appendChild(newRow);
+                        } else {
+                            noSessionsRow.style.display = '';
+                        }
+                    } else if (noSessionsRow) {
+                        noSessionsRow.style.display = 'none';
+                    }
+                }, 500);
+            }
+
+            // Filter form elements already have name attributes in the HTML
+
+            // Create Session functionality
+            const createSessionBtn = document.getElementById('createSessionBtn');
+            const newSessionForm = document.getElementById('newSessionForm');
+
+            if (createSessionBtn && newSessionForm) {
+                createSessionBtn.addEventListener('click', function() {
+                    // Validate time inputs
+                    const startTime = newSessionForm.querySelector('input[name="startTime"]').value;
+                    const endTime = newSessionForm.querySelector('input[name="endTime"]').value;
+
+                    if (startTime >= endTime) {
+                        showNotification('error', 'End time must be after start time');
+                        return;
+                    }
+
+                    // Get form data
+                    const formData = new FormData(newSessionForm);
+
+                    // Send AJAX request
+                    fetch('{{ path('instructor_session_create') }}', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            showNotification('success', data.message);
+
+                            // Close the modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('newSessionModal'));
+                            modal.hide();
+
+                            // Reload the page to show the new session
+                            window.location.reload();
+                        } else {
+                            // Show error message
+                            showNotification('error', data.message || 'An error occurred while creating the session');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('error', 'An error occurred while creating the session');
+                    });
+                });
+            }
+
+            // Edit Session functionality
+            const editButtons = document.querySelectorAll('.edit-session-btn');
+            const editSessionForm = document.getElementById('editSessionForm');
+            const updateSessionBtn = document.getElementById('updateSessionBtn');
+
+            if (editButtons.length > 0 && editSessionForm && updateSessionBtn) {
+                editButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+
+                        const sessionId = this.getAttribute('data-session-id');
+                        document.getElementById('editSessionId').value = sessionId;
+
+                        // Get session data from the row
+                        const row = this.closest('tr');
+                        const courseTitle = row.querySelector('td:nth-child(1)').textContent.trim();
+                        const date = row.querySelector('td:nth-child(2)').textContent.trim();
+                        const timeRange = row.querySelector('td:nth-child(3)').textContent.trim();
+                        const [startTime, endTime] = timeRange.split(' - ');
+
+                        // Find the course ID based on the title
+                        const courseSelect = editSessionForm.querySelector('select[name="course"]');
+                        for (let i = 0; i < courseSelect.options.length; i++) {
+                            if (courseSelect.options[i].text === courseTitle) {
+                                courseSelect.value = courseSelect.options[i].value;
+                                break;
+                            }
+                        }
+
+                        // Set date and time values
+                        editSessionForm.querySelector('input[name="date"]').value = date;
+                        editSessionForm.querySelector('input[name="startTime"]').value = startTime;
+                        editSessionForm.querySelector('input[name="endTime"]').value = endTime;
+
+                        // Set default values for other fields
+                        // In a real application, you would fetch these from the server
+                        editSessionForm.querySelector('select[name="location"]').value = 'classroom_a';
+                        editSessionForm.querySelector('input[name="capacity"]').value = '20';
+                        editSessionForm.querySelector('select[name="sessionType"]').value = 'regular';
+                        editSessionForm.querySelector('textarea[name="description"]').value = 'Session details';
+
+                        // Show the modal
+                        const modal = new bootstrap.Modal(document.getElementById('editSessionModal'));
+                        modal.show();
+                    });
+                });
+
+                // Handle update button click
+                updateSessionBtn.addEventListener('click', function() {
+                    // Validate time inputs
+                    const startTime = editSessionForm.querySelector('input[name="startTime"]').value;
+                    const endTime = editSessionForm.querySelector('input[name="endTime"]').value;
+
+                    if (startTime >= endTime) {
+                        showNotification('error', 'End time must be after start time');
+                        return;
+                    }
+
+                    // Get form data
+                    const formData = new FormData(editSessionForm);
+                    const sessionId = document.getElementById('editSessionId').value;
+
+                    // Send AJAX request
+                    fetch(`{{ path('instructor_session_edit', {'id': 'SESSION_ID'}) }}`.replace('SESSION_ID', sessionId), {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            showNotification('success', data.message);
+
+                            // Close the modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('editSessionModal'));
+                            modal.hide();
+
+                            // Reload the page to show the updated session
+                            window.location.reload();
+                        } else {
+                            // Show error message
+                            showNotification('error', data.message || 'An error occurred while updating the session');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('error', 'An error occurred while updating the session');
+                    });
+                });
+            }
+
+            // Delete Session functionality
+            const deleteButtons = document.querySelectorAll('.delete-session-btn');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+            if (deleteButtons.length > 0 && confirmDeleteBtn) {
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+
+                        const sessionId = this.getAttribute('data-session-id');
+                        document.getElementById('deleteSessionId').value = sessionId;
+
+                        // Show the modal
+                        const modal = new bootstrap.Modal(document.getElementById('deleteSessionModal'));
+                        modal.show();
+                    });
+                });
+
+                // Handle confirm delete button click
+                confirmDeleteBtn.addEventListener('click', function() {
+                    const sessionId = document.getElementById('deleteSessionId').value;
+
+                    // Send AJAX request
+                    fetch(`{{ path('instructor_session_delete', {'id': 'SESSION_ID'}) }}`.replace('SESSION_ID', sessionId), {
+                        method: 'POST',
+                        body: JSON.stringify({ confirmed: true }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            showNotification('success', data.message);
+
+                            // Close the modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteSessionModal'));
+                            modal.hide();
+
+                            // Reload the page to update the sessions list
+                            window.location.reload();
+                        } else if (data.requiresConfirmation) {
+                            // Show warning about enrolled students
+                            document.getElementById('deleteSessionWarning').classList.remove('d-none');
+                            document.getElementById('enrollmentCount').textContent = data.enrollmentsCount;
+                        } else {
+                            // Show error message
+                            showNotification('error', data.message || 'An error occurred while deleting the session');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('error', 'An error occurred while deleting the session');
+                    });
+                });
+            }
+
+            // New Session form validation
+            if (newSessionForm) {
+                // Add validation logic here if needed
+            }
+
+            if (createSessionBtn && newSessionForm) {
+                createSessionBtn.addEventListener('click', function() {
+                    // Check if form is valid
+                    const isValid = validateForm(newSessionForm);
+
+                    if (isValid) {
+                        // Show success message
+                        alert('Session created successfully!');
+
+                        // Close the modal
+                        const newSessionModal = bootstrap.Modal.getInstance(document.getElementById('newSessionModal'));
+                        newSessionModal.hide();
+
+                        // In a real implementation, we would submit the form and refresh the page
+                        // For now, we'll just reload the page
+                        // window.location.reload();
+                    }
+                });
+            }
+
+            // Form validation function
+            function validateForm(form) {
+                let isValid = true;
+
+                // Check required fields
+                const requiredFields = form.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    if (!field.value) {
+                        isValid = false;
+                        field.classList.add('is-invalid');
+
+                        // Add error message if it doesn't exist
+                        let errorDiv = field.nextElementSibling;
+                        if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
+                            errorDiv = document.createElement('div');
+                            errorDiv.className = 'invalid-feedback';
+                            errorDiv.textContent = 'This field is required';
+                            field.parentNode.insertBefore(errorDiv, field.nextSibling);
+                        }
+                    } else {
+                        field.classList.remove('is-invalid');
+
+                        // Remove error message if it exists
+                        const errorDiv = field.nextElementSibling;
+                        if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+                            errorDiv.remove();
+                        }
+                    }
+                });
+
+                return isValid;
+            }
+        });
+    </script>
+{% endblock %}

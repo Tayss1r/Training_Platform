@@ -41,9 +41,16 @@ class Course
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $syllabus = null;
 
+    /**
+     * @var Collection<int, Material>
+     */
+    #[ORM\OneToMany(targetEntity: Material::class, mappedBy: 'course', orphanRemoval: true)]
+    private Collection $materials;
+
     public function __construct()
     {
         $this->sessions = new ArrayCollection();
+        $this->materials = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -149,6 +156,36 @@ class Course
     public function setSyllabus(?string $syllabus): static
     {
         $this->syllabus = $syllabus;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Material>
+     */
+    public function getMaterials(): Collection
+    {
+        return $this->materials;
+    }
+
+    public function addMaterial(Material $material): static
+    {
+        if (!$this->materials->contains($material)) {
+            $this->materials->add($material);
+            $material->setCourse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMaterial(Material $material): static
+    {
+        if ($this->materials->removeElement($material)) {
+            // set the owning side to null (unless already changed)
+            if ($material->getCourse() === $this) {
+                $material->setCourse(null);
+            }
+        }
 
         return $this;
     }

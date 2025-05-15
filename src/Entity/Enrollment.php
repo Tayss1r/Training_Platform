@@ -19,6 +19,14 @@ class Enrollment
     #[ORM\ManyToOne(inversedBy: 'enrollments')]
     private ?Session $session = null;
 
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $createdAt = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -44,6 +52,18 @@ class Enrollment
     public function setSession(?Session $session): static
     {
         $this->session = $session;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }

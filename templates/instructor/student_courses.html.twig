@@ -1,0 +1,261 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Student Courses{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('instructor_dashboard') }}">Instructor</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('instructor_students') }}">Students</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('instructor_student_details', {'id': student.id}) }}">{{ student.firstName }} {{ student.lastName }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Courses</li>
+            </ol>
+        </nav>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card instructor-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Student Information</h5>
+                        <div>
+                            <a href="{{ path('instructor_student_details', {'id': student.id}) }}" class="btn btn-primary">
+                                <i class="bx bx-user me-1"></i>Profile
+                            </a>
+                            <a href="{{ path('instructor_student_progress', {'id': student.id}) }}" class="btn btn-info ms-2">
+                                <i class="bx bx-bar-chart-alt-2 me-1"></i>Progress
+                            </a>
+                            <a href="{{ path('instructor_student_sessions', {'id': student.id}) }}" class="btn btn-success ms-2">
+                                <i class="bx bx-calendar me-1"></i>Sessions
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-md me-3">
+                                        {% if student.image is defined and student.image %}
+                                            <img src="{{ asset('assets/img/avatars/' ~ student.image) }}" alt="Avatar" class="rounded-circle">
+                                        {% else %}
+                                            <div class="avatar-initial rounded-circle bg-primary">{{ student.firstName|first }}{{ student.lastName|first }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ student.firstName }} {{ student.lastName }}</h6>
+                                        <small class="text-muted">{{ student.email }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <span class="icon-circle bg-info text-white"><i class="bx bx-book"></i></span>
+                                    <div class="ms-3">
+                                        <h6 class="mb-0">Enrolled Courses</h6>
+                                        <p class="mb-0">{{ courses|length }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <span class="icon-circle bg-success text-white"><i class="bx bx-calendar"></i></span>
+                                    <div class="ms-3">
+                                        <h6 class="mb-0">Total Sessions</h6>
+                                        {% set totalSessions = 0 %}
+                                        {% for courseData in courses %}
+                                            {% set totalSessions = totalSessions + courseData.sessions|length %}
+                                        {% endfor %}
+                                        <p class="mb-0">{{ totalSessions }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card instructor-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Enrolled Courses</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                <input type="text" class="form-control" id="searchCourses" placeholder="Search courses...">
+                            </div>
+                        </div>
+                        
+                        <div class="row" id="coursesList">
+                            {% for courseId, courseData in courses %}
+                                <div class="col-md-6 mb-4" data-course-title="{{ courseData.course.title }}">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h5 class="card-title mb-0">{{ courseData.course.title }}</h5>
+                                                <span class="badge bg-label-{{ courseData.grade in ['A', 'A-'] ? 'success' : (courseData.grade in ['B+', 'B'] ? 'info' : 'warning') }}">{{ courseData.grade }}</span>
+                                            </div>
+                                            <p class="card-text text-muted mb-3">{{ courseData.course.description|default('No description available') }}</p>
+                                            
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span>Progress</span>
+                                                    <span>{{ courseData.progress }}%</span>
+                                                </div>
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar bg-primary" style="width: {{ courseData.progress }}%;" role="progressbar" aria-valuenow="{{ courseData.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <small class="text-muted">{{ courseData.sessions|length }} Sessions</small>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#courseModal{{ courseData.course.id }}">
+                                                    <i class="bx bx-info-circle me-1"></i>Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="col-12">
+                                    <div class="alert alert-info">
+                                        <i class="bx bx-info-circle me-1"></i>
+                                        No courses found for this student
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Detail Modals -->
+    {% for courseId, courseData in courses %}
+        <div class="modal fade instructor-modal" id="courseModal{{ courseData.course.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ courseData.course.title }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <h6 class="fw-semibold mb-2">Course Progress</h6>
+                            <div class="progress mb-2" style="height: 8px;">
+                                <div class="progress-bar bg-primary" style="width: {{ courseData.progress }}%;" role="progressbar" aria-valuenow="{{ courseData.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">{{ courseData.progress }}% completed</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="fw-semibold mb-2">Current Grade: <span class="badge bg-label-{{ courseData.grade in ['A', 'A-'] ? 'success' : (courseData.grade in ['B+', 'B'] ? 'info' : 'warning') }}">{{ courseData.grade }}</span></h6>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="fw-semibold mb-3">Sessions</h6>
+                            <div class="table-responsive">
+                                <table class="table instructor-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                            <th>Attendance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for session in courseData.sessions %}
+                                            <tr>
+                                                <td>{{ session.date|date('Y-m-d') }}</td>
+                                                <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                                <td>
+                                                    {% set now = "now"|date('Y-m-d') %}
+                                                    {% if session.date|date('Y-m-d') > now %}
+                                                        <span class="badge-instructor badge-success">Upcoming</span>
+                                                    {% elseif session.date|date('Y-m-d') < now %}
+                                                        <span class="badge-instructor badge-info">Completed</span>
+                                                    {% else %}
+                                                        <span class="badge-instructor badge-warning">Today</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if session.date|date('Y-m-d') < now %}
+                                                        {% if random(0, 1) > 0.2 %}
+                                                            <span class="badge bg-label-success">Present</span>
+                                                        {% else %}
+                                                            <span class="badge bg-label-danger">Absent</span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="badge bg-label-secondary">N/A</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="4" class="text-center">No sessions found</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search functionality
+            const searchInput = document.getElementById('searchCourses');
+            const coursesList = document.getElementById('coursesList');
+            const courseCards = coursesList.querySelectorAll('.col-md-6');
+            
+            searchInput.addEventListener('keyup', function() {
+                const searchText = searchInput.value.toLowerCase();
+                
+                courseCards.forEach(card => {
+                    const courseTitle = card.getAttribute('data-course-title').toLowerCase();
+                    
+                    if (courseTitle.includes(searchText)) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // Check if any cards are visible
+                let visibleCards = false;
+                courseCards.forEach(card => {
+                    if (card.style.display !== 'none') {
+                        visibleCards = true;
+                    }
+                });
+                
+                // Show "No courses found" message if no cards are visible
+                let noCoursesMessage = coursesList.querySelector('.alert-info');
+                if (!visibleCards) {
+                    if (!noCoursesMessage) {
+                        noCoursesMessage = document.createElement('div');
+                        noCoursesMessage.className = 'col-12';
+                        noCoursesMessage.innerHTML = '<div class="alert alert-info"><i class="bx bx-info-circle me-1"></i>No courses match your search</div>';
+                        coursesList.appendChild(noCoursesMessage);
+                    }
+                } else if (noCoursesMessage) {
+                    noCoursesMessage.style.display = 'none';
+                }
+            });
+        });
+    </script>
+{% endblock %}
