@@ -43,7 +43,7 @@
                                     <span class="icon-circle bg-success text-white"><i class="bx bx-calendar"></i></span>
                                     <div class="ms-3">
                                         <h6 class="mb-0">Date</h6>
-                                        <p class="mb-0">{{ session.date|date('Y-m-d') }}</p>
+                                        <p class="mb-0">{{ session.startDate|date('Y-m-d') }}{% if session.startDate != session.endDate %} to {{ session.endDate|date('Y-m-d') }}{% endif %}</p>
                                     </div>
                                 </div>
                             </div>

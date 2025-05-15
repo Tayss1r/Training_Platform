@@ -4,29 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <style>
-        #notification-container {
-            max-width: 350px;
-        }
-
-        #notification-container .alert {
-            margin-bottom: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-left: 4px solid;
-        }
-
-        #notification-container .alert-success {
-            border-left-color: #28a745;
-        }
-
-        #notification-container .alert-danger {
-            border-left-color: #dc3545;
-        }
-
-        .fade {
-            transition: opacity 0.3s linear;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/custom-toast.css') }}" />
 {% endblock %}
 
 {% block body %}
@@ -86,15 +64,15 @@
                                     {% for session in sessions %}
                                         <tr data-course-id="{{ session.course.id }}">
                                             <td><strong>{{ session.course.title }}</strong></td>
-                                            <td>{{ session.date|date('Y-m-d') }}</td>
-                                            <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                            <td>{{ session.startDate|date('Y-m-d') }}{% if session.startDate != session.endDate %} to {{ session.endDate|date('Y-m-d') }}{% endif %}</td>
+                                            <td>{{ session.time|date('H:i') }}</td>
                                             <td>{{ session.capacity }}</td>
                                             <td>{{ session.enrollments|length }}</td>
                                             <td>
                                                 {% set now = "now"|date('Y-m-d') %}
-                                                {% if session.date|date('Y-m-d') > now %}
+                                                {% if session.startDate|date('Y-m-d') > now %}
                                                     <span class="badge-instructor badge-success">Upcoming</span>
-                                                {% elseif session.date|date('Y-m-d') < now %}
+                                                {% elseif session.endDate|date('Y-m-d') < now %}
                                                     <span class="badge-instructor badge-info">Completed</span>
                                                 {% else %}
                                                     <span class="badge-instructor badge-warning">In Progress</span>
@@ -160,8 +138,8 @@
                                         {% for session in upcomingSessions %}
                                             <tr data-course-id="{{ session.course.id }}">
                                                 <td><strong>{{ session.course.title }}</strong></td>
-                                                <td>{{ session.date|date('Y-m-d') }}</td>
-                                                <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                                <td>{{ session.startDate|date('Y-m-d') }}{% if session.startDate != session.endDate %} to {{ session.endDate|date('Y-m-d') }}{% endif %}</td>
+                                                <td>{{ session.time|date('H:i') }}</td>
                                                 <td>{{ session.capacity }}</td>
                                                 <td>{{ session.enrollments|length }}</td>
                                                 <td>
@@ -216,8 +194,8 @@
                                         {% for session in inProgressSessions %}
                                             <tr data-course-id="{{ session.course.id }}">
                                                 <td><strong>{{ session.course.title }}</strong></td>
-                                                <td>{{ session.date|date('Y-m-d') }}</td>
-                                                <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                                <td>{{ session.startDate|date('Y-m-d') }}{% if session.startDate != session.endDate %} to {{ session.endDate|date('Y-m-d') }}{% endif %}</td>
+                                                <td>{{ session.time|date('H:i') }}</td>
                                                 <td>{{ session.capacity }}</td>
                                                 <td>{{ session.enrollments|length }}</td>
                                                 <td>
@@ -272,8 +250,8 @@
                                         {% for session in completedSessions %}
                                             <tr data-course-id="{{ session.course.id }}">
                                                 <td><strong>{{ session.course.title }}</strong></td>
-                                                <td>{{ session.date|date('Y-m-d') }}</td>
-                                                <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                                <td>{{ session.startDate|date('Y-m-d') }}{% if session.startDate != session.endDate %} to {{ session.endDate|date('Y-m-d') }}{% endif %}</td>
+                                                <td>{{ session.time|date('H:i') }}</td>
                                                 <td>{{ session.capacity }}</td>
                                                 <td>{{ session.enrollments|length }}</td>
                                                 <td>
@@ -393,20 +371,17 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">Session Date</label>
-                                <input type="date" class="form-control" name="date" required>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" name="startDate" required>
                             </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Start Time</label>
-                                <input type="time" class="form-control" name="startTime" required>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" name="endDate" required>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">End Time</label>
-                                <input type="time" class="form-control" name="endTime" required>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Time</label>
+                                <input type="time" class="form-control" name="time" required>
                             </div>
                         </div>
 
@@ -447,8 +422,7 @@
         </div>
     </div>
 
-    <!-- Notification Container -->
-    <div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+    <!-- Toast container will be created by our custom-toast.js -->
 
     <!-- Edit Session Modal -->
     <div class="modal fade instructor-modal" id="editSessionModal" tabindex="-1" aria-hidden="true">
@@ -484,20 +458,17 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">Session Date</label>
-                                <input type="date" class="form-control" name="date" required>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" name="startDate" required>
                             </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Start Time</label>
-                                <input type="time" class="form-control" name="startTime" required>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" name="endDate" required>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">End Time</label>
-                                <input type="time" class="form-control" name="endTime" required>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Time</label>
+                                <input type="time" class="form-control" name="time" required>
                             </div>
                         </div>
 
@@ -559,32 +530,27 @@
         </div>
     </div>
 
+    <script src="{{ asset('js/custom-toast.js') }}"></script>
     <script>
-        // Function to show notifications
+        // Function to show notifications using our custom toast system
         function showNotification(type, message) {
-            const container = document.getElementById('notification-container');
-            const notification = document.createElement('div');
-
-            // Set notification styles based on type
-            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
-            notification.role = 'alert';
-
-            // Add notification content
-            notification.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            `;
-
-            // Add to container
-            container.appendChild(notification);
-
-            // Auto-dismiss after 5 seconds
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    container.removeChild(notification);
-                }, 300);
-            }, 5000);
+            if (type === 'success') {
+                toastNotification.success({
+                    message: message
+                });
+            } else if (type === 'error' || type === 'danger') {
+                toastNotification.error({
+                    message: message
+                });
+            } else if (type === 'warning') {
+                toastNotification.warning({
+                    message: message
+                });
+            } else {
+                toastNotification.info({
+                    message: message
+                });
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -768,24 +734,40 @@
 
             if (createSessionBtn && newSessionForm) {
                 createSessionBtn.addEventListener('click', function() {
-                    // Validate time inputs
-                    const startTime = newSessionForm.querySelector('input[name="startTime"]').value;
-                    const endTime = newSessionForm.querySelector('input[name="endTime"]').value;
-
-                    if (startTime >= endTime) {
-                        showNotification('error', 'End time must be after start time');
+                    // First validate the form
+                    const isValid = validateForm(newSessionForm);
+                    if (!isValid) {
                         return;
                     }
 
                     // Get form data
                     const formData = new FormData(newSessionForm);
 
+                    // Debug form data
+                    console.log('Form data being submitted:');
+                    for (let [key, value] of formData.entries()) {
+                        console.log(`${key}: ${value}`);
+                    }
+
                     // Send AJAX request
                     fetch('{{ path('instructor_session_create') }}', {
                         method: 'POST',
                         body: formData
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        // Try to parse the response as JSON, but handle HTML error responses
+                        return response.text().then(text => {
+                            try {
+                                // Try to parse as JSON
+                                return JSON.parse(text);
+                            } catch (e) {
+                                console.error('Failed to parse response as JSON:', text.substring(0, 500));
+                                // If it's not JSON, it's probably an error page
+                                throw new Error('Server returned an HTML error page. Check server logs.');
+                            }
+                        });
+                    })
                     .then(data => {
                         if (data.success) {
                             // Show success message
@@ -799,12 +781,13 @@
                             window.location.reload();
                         } else {
                             // Show error message
+                            console.error('Error details:', data);
                             showNotification('error', data.message || 'An error occurred while creating the session');
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        showNotification('error', 'An error occurred while creating the session');
+                        showNotification('error', 'An error occurred while creating the session. Check console for details.');
                     });
                 });
             }
@@ -839,9 +822,9 @@
                         }
 
                         // Set date and time values
-                        editSessionForm.querySelector('input[name="date"]').value = date;
-                        editSessionForm.querySelector('input[name="startTime"]').value = startTime;
-                        editSessionForm.querySelector('input[name="endTime"]').value = endTime;
+                        editSessionForm.querySelector('input[name="startDate"]').value = date;
+                        editSessionForm.querySelector('input[name="endDate"]').value = date;
+                        editSessionForm.querySelector('input[name="time"]').value = startTime;
 
                         // Set default values for other fields
                         // In a real application, you would fetch these from the server
@@ -858,12 +841,9 @@
 
                 // Handle update button click
                 updateSessionBtn.addEventListener('click', function() {
-                    // Validate time inputs
-                    const startTime = editSessionForm.querySelector('input[name="startTime"]').value;
-                    const endTime = editSessionForm.querySelector('input[name="endTime"]').value;
-
-                    if (startTime >= endTime) {
-                        showNotification('error', 'End time must be after start time');
+                    // First validate the form
+                    const isValid = validateForm(editSessionForm);
+                    if (!isValid) {
                         return;
                     }
 
@@ -963,36 +943,20 @@
                 // Add validation logic here if needed
             }
 
-            if (createSessionBtn && newSessionForm) {
-                createSessionBtn.addEventListener('click', function() {
-                    // Check if form is valid
-                    const isValid = validateForm(newSessionForm);
-
-                    if (isValid) {
-                        // Show success message
-                        alert('Session created successfully!');
-
-                        // Close the modal
-                        const newSessionModal = bootstrap.Modal.getInstance(document.getElementById('newSessionModal'));
-                        newSessionModal.hide();
-
-                        // In a real implementation, we would submit the form and refresh the page
-                        // For now, we'll just reload the page
-                        // window.location.reload();
-                    }
-                });
-            }
-
             // Form validation function
             function validateForm(form) {
                 let isValid = true;
+                let errorMessages = [];
 
                 // Check required fields
                 const requiredFields = form.querySelectorAll('[required]');
                 requiredFields.forEach(field => {
+                    const label = field.previousElementSibling ? field.previousElementSibling.textContent : field.name;
+
                     if (!field.value) {
                         isValid = false;
                         field.classList.add('is-invalid');
+                        errorMessages.push(`${label} is required`);
 
                         // Add error message if it doesn't exist
                         let errorDiv = field.nextElementSibling;
@@ -1012,6 +976,52 @@
                         }
                     }
                 });
+
+                // Validate start date is not after end date
+                const startDateField = form.querySelector('input[name="startDate"]');
+                const endDateField = form.querySelector('input[name="endDate"]');
+
+                if (startDateField && endDateField && startDateField.value && endDateField.value) {
+                    const startDate = new Date(startDateField.value);
+                    const endDate = new Date(endDateField.value);
+
+                    if (startDate > endDate) {
+                        isValid = false;
+
+                        // Mark fields as invalid
+                        startDateField.classList.add('is-invalid');
+                        endDateField.classList.add('is-invalid');
+
+                        // Add error message for start date
+                        let startErrorDiv = startDateField.nextElementSibling;
+                        if (!startErrorDiv || !startErrorDiv.classList.contains('invalid-feedback')) {
+                            startErrorDiv = document.createElement('div');
+                            startErrorDiv.className = 'invalid-feedback';
+                            startDateField.parentNode.insertBefore(startErrorDiv, startDateField.nextSibling);
+                        }
+                        startErrorDiv.textContent = 'Start date cannot be after end date';
+
+                        // Add error message for end date
+                        let endErrorDiv = endDateField.nextElementSibling;
+                        if (!endErrorDiv || !endErrorDiv.classList.contains('invalid-feedback')) {
+                            endErrorDiv = document.createElement('div');
+                            endErrorDiv.className = 'invalid-feedback';
+                            endDateField.parentNode.insertBefore(endErrorDiv, endDateField.nextSibling);
+                        }
+                        endErrorDiv.textContent = 'End date must be after or equal to start date';
+
+                        errorMessages.push('Date range is invalid');
+                    }
+                }
+
+                // Show toast notification with validation errors if any
+                if (!isValid && errorMessages.length > 0) {
+                    toastNotification.error({
+                        title: 'Validation Error',
+                        message: `Please fix the following errors:<br>• ${errorMessages.join('<br>• ')}`,
+                        icon: 'bx bx-error-circle'
+                    });
+                }
 
                 return isValid;
             }

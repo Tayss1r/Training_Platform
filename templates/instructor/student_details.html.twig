@@ -163,16 +163,16 @@
                                     <div>
                                         <i class="bx bx-calendar me-2 text-info"></i>
                                         <span>{{ session.course.title }}</span>
-                                        <small class="text-muted ms-2">({{ session.date|date('Y-m-d') }})</small>
+                                        <small class="text-muted ms-2">({{ session.startDate|date('Y-m-d') }}{% if session.startDate != session.endDate %} to {{ session.endDate|date('Y-m-d') }}{% endif %})</small>
                                     </div>
                                     <div>
                                         {% set now = "now"|date('Y-m-d') %}
-                                        {% if session.date|date('Y-m-d') > now %}
+                                        {% if session.startDate|date('Y-m-d') > now %}
                                             <span class="badge-instructor badge-success">Upcoming</span>
-                                        {% elseif session.date|date('Y-m-d') < now %}
+                                        {% elseif session.endDate|date('Y-m-d') < now %}
                                             <span class="badge-instructor badge-info">Completed</span>
                                         {% else %}
-                                            <span class="badge-instructor badge-warning">Today</span>
+                                            <span class="badge-instructor badge-warning">In Progress</span>
                                         {% endif %}
                                     </div>
                                 </li>

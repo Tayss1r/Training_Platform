@@ -35,11 +35,11 @@
                                 </div>
                                 <div class="mb-3">
                                     <h6 class="fw-semibold">Date</h6>
-                                    <p>{{ session.date|date('Y-m-d') }}</p>
+                                    <p>{{ session.startDate|date('Y-m-d') }}{% if session.startDate != session.endDate %} to {{ session.endDate|date('Y-m-d') }}{% endif %}</p>
                                 </div>
                                 <div class="mb-3">
                                     <h6 class="fw-semibold">Time</h6>
-                                    <p>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</p>
+                                    <p>{{ session.time|date('H:i') }}</p>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -54,9 +54,9 @@
                                 <div class="mb-3">
                                     <h6 class="fw-semibold">Status</h6>
                                     {% set now = "now"|date('Y-m-d') %}
-                                    {% if session.date|date('Y-m-d') > now %}
+                                    {% if session.startDate|date('Y-m-d') > now %}
                                         <span class="badge-instructor badge-success">Upcoming</span>
-                                    {% elseif session.date|date('Y-m-d') < now %}
+                                    {% elseif session.endDate|date('Y-m-d') < now %}
                                         <span class="badge-instructor badge-info">Completed</span>
                                     {% else %}
                                         <span class="badge-instructor badge-warning">In Progress</span>

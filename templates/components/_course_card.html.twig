@@ -1,0 +1,82 @@
+{# 
+   Course Card Component
+   Parameters:
+   - course: The course entity to display
+   - showActions: (optional) Whether to show action buttons (default: true)
+   - showCategory: (optional) Whether to show category badge (default: true)
+   - showDuration: (optional) Whether to show duration (default: true)
+   - showSessions: (optional) Whether to show available sessions count (default: true)
+   - showMaterials: (optional) Whether to show materials count (default: true)
+   - showCreatedAt: (optional) Whether to show creation date (default: false)
+#}
+
+{% set showActions = showActions is defined ? showActions : true %}
+{% set showCategory = showCategory is defined ? showCategory : true %}
+{% set showDuration = showDuration is defined ? showDuration : true %}
+{% set showSessions = showSessions is defined ? showSessions : true %}
+{% set showMaterials = showMaterials is defined ? showMaterials : true %}
+{% set showCreatedAt = showCreatedAt is defined ? showCreatedAt : false %}
+
+<div class="card h-100 course-card">
+    {% if course.image %}
+        <img src="{{ asset('uploads/courses/' ~ course.image) }}" class="card-img-top" alt="{{ course.title }}">
+    {% else %}
+        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+            <i class="bx bx-book-open text-primary" style="font-size: 4rem;"></i>
+        </div>
+    {% endif %}
+    
+    <div class="card-body d-flex flex-column">
+        {% if showCategory and course.category %}
+            <div class="mb-2">
+                <span class="badge bg-label-primary">{{ course.category.name }}</span>
+            </div>
+        {% endif %}
+        
+        <h5 class="card-title">{{ course.title }}</h5>
+        
+        <p class="card-text text-muted mb-3">
+            {{ course.description|length > 120 ? course.description|slice(0, 120) ~ '...' : course.description }}
+        </p>
+        
+        <div class="mt-auto">
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                {% if showDuration and course.duration %}
+                    <div class="course-info-badge">
+                        <i class="bx bx-time me-1"></i>
+                        <span>{{ course.duration }} hours</span>
+                    </div>
+                {% endif %}
+                
+                {% if showSessions %}
+                    <div class="course-info-badge">
+                        <i class="bx bx-calendar me-1"></i>
+                        <span>{{ course.sessions|length }} session{{ course.sessions|length != 1 ? 's' : '' }}</span>
+                    </div>
+                {% endif %}
+                
+                {% if showMaterials %}
+                    <div class="course-info-badge">
+                        <i class="bx bx-file me-1"></i>
+                        <span>{{ course.materials|length }} material{{ course.materials|length != 1 ? 's' : '' }}</span>
+                    </div>
+                {% endif %}
+                
+                {% if showCreatedAt and course.createdAt %}
+                    <div class="course-info-badge">
+                        <i class="bx bx-calendar-plus me-1"></i>
+                        <span>Added {{ course.createdAt|date('M d, Y') }}</span>
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if showActions %}
+                <div class="d-grid gap-2">
+                    <a href="{{ path('course_show', {'id': course.id}) }}" class="btn btn-primary">
+                        <i class="bx bx-show me-1"></i>View Course
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

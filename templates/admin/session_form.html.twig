@@ -28,20 +28,20 @@
                                 {{ form_widget(form.course, {'attr': {'class': 'form-select'}}) }}
                                 {{ form_errors(form.course) }}
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="{{ form.date.vars.id }}">Date</label>
-                                {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.date) }}
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.startDate.vars.id }}">Start Date</label>
+                                {{ form_widget(form.startDate, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.startDate) }}
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="{{ form.startTime.vars.id }}">Start Time</label>
-                                {{ form_widget(form.startTime, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.startTime) }}
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.endDate.vars.id }}">End Date</label>
+                                {{ form_widget(form.endDate, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.endDate) }}
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="{{ form.endTime.vars.id }}">End Time</label>
-                                {{ form_widget(form.endTime, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.endTime) }}
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.time.vars.id }}">Time</label>
+                                {{ form_widget(form.time, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.time) }}
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label" for="{{ form.capacity.vars.id }}">Capacity</label>
@@ -66,25 +66,25 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize date picker with min date as today
-        const dateInput = document.querySelector('#{{ form.date.vars.id }}');
-        if (dateInput) {
+        const startDateInput = document.querySelector('#{{ form.startDate.vars.id }}');
+        if (startDateInput) {
             const today = new Date().toISOString().split('T')[0];
-            dateInput.setAttribute('min', today);
+            startDateInput.setAttribute('min', today);
         }
-        
-        // Validate end time is after start time
+
+        // Validate end date is after or equal to start date
         const form = document.querySelector('form');
         if (form) {
             form.addEventListener('submit', function(e) {
-                const startTime = document.querySelector('#{{ form.startTime.vars.id }}').value;
-                const endTime = document.querySelector('#{{ form.endTime.vars.id }}').value;
-                
-                if (startTime && endTime && startTime >= endTime) {
+                const startDate = new Date(document.querySelector('#{{ form.startDate.vars.id }}').value);
+                const endDate = new Date(document.querySelector('#{{ form.endDate.vars.id }}').value);
+
+                if (startDate && endDate && startDate > endDate) {
                     e.preventDefault();
-                    alert('End time must be after start time');
+                    alert('End date must be after or equal to start date');
                 }
             });
         }
     });
 </script>
-{% endblock %} 
+{% endblock %}

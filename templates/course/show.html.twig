@@ -36,16 +36,92 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="badge bg-label-primary">{{ course.category.name }}</span>
-                            <span class="text-muted">
-                                <i class="bx bx-time me-1"></i>{{ course.duration }} hours
-                            </span>
+                            <div class="d-flex gap-2">
+                                {% if course.createdAt and course.createdAt|date_modify('+7 days') > date() %}
+                                    <span class="badge bg-label-danger">New</span>
+                                {% endif %}
+                                <span class="badge bg-label-info">
+                                    <i class="bx bx-time me-1"></i>{{ course.duration }} hours
+                                </span>
+                            </div>
                         </div>
                         <h1 class="card-title mb-4">{{ course.title }}</h1>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="course-info-card mb-3">
+                                    <div class="course-info-icon">
+                                        <i class="bx bx-calendar"></i>
+                                    </div>
+                                    <div class="course-info-content">
+                                        <h6>Sessions</h6>
+                                        <p>{{ course.sessions|length }} available session{{ course.sessions|length != 1 ? 's' : '' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="course-info-card mb-3">
+                                    <div class="course-info-icon">
+                                        <i class="bx bx-file"></i>
+                                    </div>
+                                    <div class="course-info-content">
+                                        <h6>Materials</h6>
+                                        <p>{{ course.materials|length }} course material{{ course.materials|length != 1 ? 's' : '' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if course.createdAt %}
+                            <div class="col-md-6">
+                                <div class="course-info-card mb-3">
+                                    <div class="course-info-icon">
+                                        <i class="bx bx-calendar-plus"></i>
+                                    </div>
+                                    <div class="course-info-content">
+                                        <h6>Added On</h6>
+                                        <p>{{ course.createdAt|date('F d, Y') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
                         <div class="mb-4">
                             <h5 class="mb-3">About This Course</h5>
                             <p class="card-text">{{ course.description }}</p>
                         </div>
                     </div>
+
+                    <style>
+                        .course-info-card {
+                            display: flex;
+                            align-items: center;
+                            padding: 15px;
+                            background-color: #f8f9fa;
+                            border-radius: 8px;
+                            transition: all 0.3s ease;
+                        }
+
+                        .course-info-card:hover {
+                            background-color: #e9ecef;
+                            transform: translateY(-2px);
+                        }
+
+                        .course-info-icon {
+                            font-size: 24px;
+                            color: #696cff;
+                            margin-right: 15px;
+                        }
+
+                        .course-info-content h6 {
+                            margin-bottom: 5px;
+                            color: #566a7f;
+                        }
+
+                        .course-info-content p {
+                            margin-bottom: 0;
+                            color: #697a8d;
+                        }
+                    </style>
                 </div>
 
                 <!-- Course Sessions -->
@@ -70,13 +146,13 @@
                                         {% for session in course.sessions %}
                                             <tr>
                                                 <td>Session {{ loop.index }}</td>
-                                                <td>{{ session.date|date('Y-m-d') }}</td>
-                                                <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                                <td>{{ session.startDate|date('Y-m-d') }}{% if session.startDate != session.endDate %} to {{ session.endDate|date('Y-m-d') }}{% endif %}</td>
+                                                <td>{{ session.time|date('H:i') }}</td>
                                                 {% if sessionsCapacity[session.id] <= 0 %}
                                                     <td>
                                                         <span class="badge bg-label-danger">Full</span>
                                                     </td>
-                                                {% elseif session.date < date() %}
+                                                {% elseif session.startDate < date() %}
                                                     <td>
                                                         <span class="badge bg-label-danger">Expired</span>
                                                     </td>
@@ -94,7 +170,7 @@
                                                         <button class="btn btn-sm btn-outline-secondary" disabled>
                                                             <i class="bx bx-x me-1"></i>Full
                                                         </button>
-                                                    {% elseif session.date < date() %}
+                                                    {% elseif session.startDate < date() %}
                                                         <button class="btn btn-sm btn-outline-secondary" disabled>
                                                             <i class="bx bx-x me-1"></i>Expired
                                                         </button>

@@ -143,8 +143,8 @@
                                     {% for session in upcomingSessions %}
                                         <tr>
                                             <td><strong>{{ session.course.title }}</strong></td>
-                                            <td>{{ session.date|date("Y-m-d") }}</td>
-                                            <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                            <td>{{ session.startDate|date("Y-m-d") }}{% if session.startDate != session.endDate %} to {{ session.endDate|date('Y-m-d') }}{% endif %}</td>
+                                            <td>{{ session.time|date('H:i') }}</td>
                                             <td>{{ session.enrollments|length }}/{{ session.capacity }}</td>
                                             <td><span class="badge-instructor badge-success">Upcoming</span></td>
                                         </tr>

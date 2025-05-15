@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Course;
 use App\Entity\Session;
 use App\Entity\Category;
-use App\Entity\Enrollment;
 use App\Entity\Material;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
@@ -100,14 +99,15 @@ class InstructorController extends AbstractController
         $completedSessions = [];
 
         foreach ($sessions as $session) {
-            $sessionDate = $session->getDate();
+            $startDate = $session->getStartDate();
+            $endDate = $session->getEndDate();
 
-            if ($sessionDate > $now) {
+            if ($startDate > $now) {
                 $upcomingSessions[] = $session;
-            } elseif ($sessionDate->format('Y-m-d') === $now->format('Y-m-d')) {
-                $inProgressSessions[] = $session;
-            } else {
+            } elseif ($endDate < $now) {
                 $completedSessions[] = $session;
+            } else {
+                $inProgressSessions[] = $session;
             }
         }
 
@@ -259,7 +259,7 @@ class InstructorController extends AbstractController
         ]);
     }
 
-    #[Route('/sessions/{id}', name: 'instructor_session_details')]
+    #[Route('/sessions/{id}', name: 'instructor_session_details', priority: -10)]
     public function sessionDetails(EntityManagerInterface $entityManager, int $id): Response
     {
         // Get all categories for the sidebar
@@ -299,7 +299,7 @@ class InstructorController extends AbstractController
         ]);
     }
 
-    #[Route('/sessions/{id}/students', name: 'instructor_session_students')]
+    #[Route('/sessions/{id}/students', name: 'instructor_session_students', priority: -10)]
     public function sessionStudents(EntityManagerInterface $entityManager, int $id): Response
     {
         // Get all categories for the sidebar
@@ -334,7 +334,7 @@ class InstructorController extends AbstractController
         ]);
     }
 
-    #[Route('/sessions/{id}/progress', name: 'instructor_session_progress')]
+    #[Route('/sessions/{id}/progress', name: 'instructor_session_progress', priority: -10)]
     public function sessionProgress(EntityManagerInterface $entityManager, int $id): Response
     {
         // Get all categories for the sidebar
@@ -370,40 +370,78 @@ class InstructorController extends AbstractController
         ]);
     }
 
-    #[Route('/sessions/create', name: 'instructor_session_create', methods: ['POST'])]
+    #[Route('/sessions/test', name: 'instructor_session_test', methods: ['GET'], priority: 10)]
+    public function testSession(): Response
+    {
+        return new JsonResponse([
+            'success' => true,
+            'message' => 'Test route is working'
+        ]);
+    }
+
+    #[Route('/sessions/new', name: 'instructor_session_create', methods: ['POST'], priority: 10)]
     public function createSession(EntityManagerInterface $entityManager, Request $request): Response
     {
+        // Enable detailed error reporting for debugging
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
         // Get form data
         $courseId = $request->request->get('course');
         $location = $request->request->get('location');
-        $date = $request->request->get('date');
-        $startTime = $request->request->get('startTime');
-        $endTime = $request->request->get('endTime');
+        $startDate = $request->request->get('startDate');
+        $endDate = $request->request->get('endDate');
+        $time = $request->request->get('time');
         $capacity = $request->request->get('capacity');
         $sessionType = $request->request->get('sessionType');
         $description = $request->request->get('description');
-        $notifyStudents = $request->request->get('notifyStudents') === 'on';
 
         // Validate required fields
-        if (!$courseId || !$location || !$date || !$startTime || !$endTime || !$capacity) {
+        $missingFields = [];
+        if (!$courseId) $missingFields[] = 'Course';
+        if (!$location) $missingFields[] = 'Location';
+        if (!$startDate) $missingFields[] = 'Start Date';
+        if (!$endDate) $missingFields[] = 'End Date';
+        if (!$time) $missingFields[] = 'Time';
+        if (!$capacity) $missingFields[] = 'Capacity';
+
+        if (!empty($missingFields)) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'All required fields must be filled out'
+                'message' => 'Please fill out the following required fields: ' . implode(', ', $missingFields)
             ], 400);
         }
 
-        // Validate start time is before end time
-        $startDateTime = new \DateTime($startTime);
-        $endDateTime = new \DateTime($endTime);
+        // Validate that start date is not after end date
+        try {
+            $startDateObj = new \DateTime($startDate);
+            $endDateObj = new \DateTime($endDate);
 
-        if ($startDateTime >= $endDateTime) {
+            if ($startDateObj > $endDateObj) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Start date cannot be after end date'
+                ], 400);
+            }
+        } catch (\Exception $e) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'End time must be after start time'
+                'message' => 'Invalid date format: ' . $e->getMessage()
             ], 400);
         }
 
         try {
+            // Log request data for debugging
+            error_log('Creating session with data: ' . json_encode([
+                'courseId' => $courseId,
+                'location' => $location,
+                'startDate' => $startDate,
+                'endDate' => $endDate,
+                'time' => $time,
+                'capacity' => $capacity,
+                'sessionType' => $sessionType
+            ]));
+
             // Get the course
             $course = $entityManager->getRepository(Course::class)->find($courseId);
             if (!$course) {
@@ -417,26 +455,48 @@ class InstructorController extends AbstractController
             $session = new Session();
             $session->setCourse($course);
             $session->setLocation($location);
-            $session->setDate(new \DateTime($date));
-            $session->setStartTime(new \DateTime($startTime));
-            $session->setEndTime(new \DateTime($endTime));
+
+            try {
+                // Parse the time (dates were already parsed during validation)
+                $timeObj = new \DateTime($time);
+
+                error_log('Parsed dates: ' . json_encode([
+                    'startDate' => $startDateObj->format('Y-m-d'),
+                    'endDate' => $endDateObj->format('Y-m-d'),
+                    'time' => $timeObj->format('H:i:s')
+                ]));
+
+                $session->setStartDate($startDateObj);
+                $session->setEndDate($endDateObj);
+                $session->setTime($timeObj);
+            } catch (\Exception $e) {
+                error_log('Time parsing error: ' . $e->getMessage());
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Invalid time format: ' . $e->getMessage(),
+                    'time' => $time
+                ], 400);
+            }
+
             $session->setCapacity((int)$capacity);
             $session->setType($sessionType);
             $session->setDescription($description);
             $session->setCreatedAt(new \DateTime());
 
+            error_log('Session object created, about to persist');
+
             // Save to database
             $entityManager->persist($session);
             $entityManager->flush();
 
-            // In a real application, we would send notifications to students if $notifyStudents is true
+            error_log('Session saved with ID: ' . $session->getId());
 
             // Prepare session data for response
             $sessionData = [
                 'id' => $session->getId(),
                 'course' => $course->getTitle(),
-                'date' => $session->getDate()->format('Y-m-d'),
-                'time' => $session->getStartTime()->format('H:i') . ' - ' . $session->getEndTime()->format('H:i'),
+                'date' => $session->getStartDate()->format('Y-m-d'),
+                'time' => $session->getTime()->format('H:i'),
                 'capacity' => $session->getCapacity(),
                 'enrolled' => 0,
                 'status' => 'upcoming',
@@ -446,18 +506,31 @@ class InstructorController extends AbstractController
 
             return new JsonResponse([
                 'success' => true,
-                'message' => 'Session created successfully',
+                'message' => sprintf(
+                    'Session for "%s" has been created successfully. It will take place on %s at %s.',
+                    $course->getTitle(),
+                    $session->getStartDate()->format('F j, Y'),
+                    $session->getTime()->format('g:i A')
+                ),
                 'session' => $sessionData
             ]);
         } catch (\Exception $e) {
+            // Log the error
+            error_log('Error creating session: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
+
+            // Return detailed error information
             return new JsonResponse([
                 'success' => false,
-                'message' => 'An error occurred: ' . $e->getMessage()
+                'message' => 'An error occurred: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ], 500);
         }
     }
 
-    #[Route('/sessions/{id}/edit', name: 'instructor_session_edit', methods: ['POST'])]
+    #[Route('/sessions/{id}/edit', name: 'instructor_session_edit', methods: ['POST'], priority: -10)]
     public function editSession(EntityManagerInterface $entityManager, Request $request, int $id): Response
     {
         // Get the session
@@ -473,30 +546,44 @@ class InstructorController extends AbstractController
         // Get form data
         $courseId = $request->request->get('course');
         $location = $request->request->get('location');
-        $date = $request->request->get('date');
-        $startTime = $request->request->get('startTime');
-        $endTime = $request->request->get('endTime');
+        $startDate = $request->request->get('startDate');
+        $endDate = $request->request->get('endDate');
+        $time = $request->request->get('time');
         $capacity = $request->request->get('capacity');
         $sessionType = $request->request->get('sessionType');
         $description = $request->request->get('description');
-        $notifyStudents = $request->request->get('notifyStudents') === 'on';
 
         // Validate required fields
-        if (!$courseId || !$location || !$date || !$startTime || !$endTime || !$capacity) {
+        $missingFields = [];
+        if (!$courseId) $missingFields[] = 'Course';
+        if (!$location) $missingFields[] = 'Location';
+        if (!$startDate) $missingFields[] = 'Start Date';
+        if (!$endDate) $missingFields[] = 'End Date';
+        if (!$time) $missingFields[] = 'Time';
+        if (!$capacity) $missingFields[] = 'Capacity';
+
+        if (!empty($missingFields)) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'All required fields must be filled out'
+                'message' => 'Please fill out the following required fields: ' . implode(', ', $missingFields)
             ], 400);
         }
 
-        // Validate start time is before end time
-        $startDateTime = new \DateTime($startTime);
-        $endDateTime = new \DateTime($endTime);
+        // Validate that start date is not after end date
+        try {
+            $startDateObj = new \DateTime($startDate);
+            $endDateObj = new \DateTime($endDate);
 
-        if ($startDateTime >= $endDateTime) {
+            if ($startDateObj > $endDateObj) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Start date cannot be after end date'
+                ], 400);
+            }
+        } catch (\Exception $e) {
             return new JsonResponse([
                 'success' => false,
-                'message' => 'End time must be after start time'
+                'message' => 'Invalid date format: ' . $e->getMessage()
             ], 400);
         }
 
@@ -513,9 +600,22 @@ class InstructorController extends AbstractController
             // Update session
             $session->setCourse($course);
             $session->setLocation($location);
-            $session->setDate(new \DateTime($date));
-            $session->setStartTime(new \DateTime($startTime));
-            $session->setEndTime(new \DateTime($endTime));
+
+            try {
+                // Parse the time (dates were already parsed during validation)
+                $timeObj = new \DateTime($time);
+
+                $session->setStartDate($startDateObj);
+                $session->setEndDate($endDateObj);
+                $session->setTime($timeObj);
+            } catch (\Exception $e) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Invalid time format: ' . $e->getMessage(),
+                    'time' => $time
+                ], 400);
+            }
+
             $session->setCapacity((int)$capacity);
             $session->setType($sessionType);
             $session->setDescription($description);
@@ -528,28 +628,29 @@ class InstructorController extends AbstractController
 
             // Determine status based on date
             $now = new \DateTime();
-            $sessionDate = $session->getDate();
+            $startDate = $session->getStartDate();
+            $endDate = $session->getEndDate();
 
-            if ($sessionDate > $now) {
+            if ($startDate > $now) {
                 $status = 'upcoming';
                 $statusLabel = 'Upcoming';
                 $statusClass = 'badge-success';
-            } elseif ($sessionDate->format('Y-m-d') === $now->format('Y-m-d')) {
-                $status = 'in_progress';
-                $statusLabel = 'In Progress';
-                $statusClass = 'badge-warning';
-            } else {
+            } elseif ($endDate < $now) {
                 $status = 'completed';
                 $statusLabel = 'Completed';
                 $statusClass = 'badge-info';
+            } else {
+                $status = 'in_progress';
+                $statusLabel = 'In Progress';
+                $statusClass = 'badge-warning';
             }
 
             // Prepare session data for response
             $sessionData = [
                 'id' => $session->getId(),
                 'course' => $course->getTitle(),
-                'date' => $session->getDate()->format('Y-m-d'),
-                'time' => $session->getStartTime()->format('H:i') . ' - ' . $session->getEndTime()->format('H:i'),
+                'date' => $session->getStartDate()->format('Y-m-d'),
+                'time' => $session->getTime()->format('H:i'),
                 'capacity' => $session->getCapacity(),
                 'enrolled' => count($session->getEnrollments()),
                 'status' => $status,
@@ -559,7 +660,12 @@ class InstructorController extends AbstractController
 
             return new JsonResponse([
                 'success' => true,
-                'message' => 'Session updated successfully',
+                'message' => sprintf(
+                    'Session for "%s" has been updated successfully. It will take place on %s at %s.',
+                    $course->getTitle(),
+                    $session->getStartDate()->format('F j, Y'),
+                    $session->getTime()->format('g:i A')
+                ),
                 'session' => $sessionData
             ]);
         } catch (\Exception $e) {
@@ -570,7 +676,7 @@ class InstructorController extends AbstractController
         }
     }
 
-    #[Route('/sessions/{id}/delete', name: 'instructor_session_delete', methods: ['POST'])]
+    #[Route('/sessions/{id}/delete', name: 'instructor_session_delete', methods: ['POST'], priority: -10)]
     public function deleteSession(EntityManagerInterface $entityManager, Request $request, int $id): Response
     {
         // Get the session
@@ -619,7 +725,7 @@ class InstructorController extends AbstractController
         }
     }
 
-    #[Route('/sessions/filter', name: 'instructor_sessions_filter', methods: ['POST'])]
+    #[Route('/sessions/filter', name: 'instructor_sessions_filter', methods: ['POST'], priority: 10)]
     public function filterSessions(EntityManagerInterface $entityManager, Request $request): Response
     {
         // Get filter parameters
@@ -637,13 +743,14 @@ class InstructorController extends AbstractController
             $filteredSessions = [];
 
             foreach ($sessions as $session) {
-                $sessionDate = $session->getDate();
+                $startDate = $session->getStartDate();
+                $endDate = $session->getEndDate();
 
-                if ($status === 'upcoming' && $sessionDate > $now) {
+                if ($status === 'upcoming' && $startDate > $now) {
                     $filteredSessions[] = $session;
-                } elseif ($status === 'in_progress' && $sessionDate->format('Y-m-d') === $now->format('Y-m-d')) {
+                } elseif ($status === 'in_progress' && $startDate <= $now && $endDate >= $now) {
                     $filteredSessions[] = $session;
-                } elseif ($status === 'completed' && $sessionDate < $now) {
+                } elseif ($status === 'completed' && $endDate < $now) {
                     $filteredSessions[] = $session;
                 }
             }
@@ -671,9 +778,14 @@ class InstructorController extends AbstractController
             $filteredSessions = [];
 
             foreach ($sessions as $session) {
-                $sessionDate = $session->getDate();
+                $startDate = $session->getStartDate();
+                $endDate = $session->getEndDate();
 
-                if ($sessionDate >= $startDateTime && $sessionDate <= $endDateTime) {
+                // Include session if any part of it falls within the filter range
+                if (($startDate >= $startDateTime && $startDate <= $endDateTime) ||
+                    ($endDate >= $startDateTime && $endDate <= $endDateTime) ||
+                    ($startDate <= $startDateTime && $endDate >= $endDateTime)
+                ) {
                     $filteredSessions[] = $session;
                 }
             }
@@ -685,27 +797,33 @@ class InstructorController extends AbstractController
         $sessionData = [];
         foreach ($sessions as $session) {
             $now = new \DateTime();
-            $sessionDate = $session->getDate();
+            $startDate = $session->getStartDate();
+            $endDate = $session->getEndDate();
 
-            if ($sessionDate > $now) {
+            if ($startDate > $now) {
                 $status = 'upcoming';
                 $statusLabel = 'Upcoming';
                 $statusClass = 'badge-success';
-            } elseif ($sessionDate->format('Y-m-d') === $now->format('Y-m-d')) {
-                $status = 'in_progress';
-                $statusLabel = 'In Progress';
-                $statusClass = 'badge-warning';
-            } else {
+            } elseif ($endDate < $now) {
                 $status = 'completed';
                 $statusLabel = 'Completed';
                 $statusClass = 'badge-info';
+            } else {
+                $status = 'in_progress';
+                $statusLabel = 'In Progress';
+                $statusClass = 'badge-warning';
+            }
+
+            $dateDisplay = $startDate->format('Y-m-d');
+            if ($startDate != $endDate) {
+                $dateDisplay .= ' to ' . $endDate->format('Y-m-d');
             }
 
             $sessionData[] = [
                 'id' => $session->getId(),
                 'course' => $session->getCourse()->getTitle(),
-                'date' => $session->getDate()->format('Y-m-d'),
-                'time' => $session->getStartTime()->format('H:i') . ' - ' . $session->getEndTime()->format('H:i'),
+                'date' => $dateDisplay,
+                'time' => $session->getTime()->format('H:i'),
                 'capacity' => $session->getCapacity(),
                 'enrolled' => count($session->getEnrollments()),
                 'status' => $status,
@@ -793,11 +911,17 @@ class InstructorController extends AbstractController
                 $hasCompletedEnrollment = false;
 
                 foreach ($studentData['sessions'] as $session) {
-                    $sessionDate = $session->getDate();
+                    $startDate = $session->getStartDate();
+                    $endDate = $session->getEndDate();
 
-                    if ($sessionDate >= $now) {
+                    if ($startDate <= $now && $endDate >= $now) {
+                        // Session is currently active
+                        $hasActiveEnrollment = true;
+                    } elseif ($startDate > $now) {
+                        // Session is upcoming
                         $hasActiveEnrollment = true;
                     } else {
+                        // Session is completed
                         $hasCompletedEnrollment = true;
                     }
                 }

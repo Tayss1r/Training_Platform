@@ -64,7 +64,7 @@
                                         {% set attendedCount = 0 %}
                                         {% set completedCount = 0 %}
                                         {% set now = "now"|date('Y-m-d') %}
-                                        
+
                                         {% for sessionData in sessions %}
                                             {% if sessionData.session.date|date('Y-m-d') < now %}
                                                 {% set completedCount = completedCount + 1 %}
@@ -73,7 +73,7 @@
                                                 {% endif %}
                                             {% endif %}
                                         {% endfor %}
-                                        
+
                                         {% set attendanceRate = completedCount > 0 ? (attendedCount / completedCount * 100)|round : 0 %}
                                         <p class="mb-0">{{ attendanceRate }}%</p>
                                     </div>
@@ -106,7 +106,7 @@
                                 <input type="text" class="form-control" id="searchSessions" placeholder="Search sessions...">
                             </div>
                         </div>
-                        
+
                         <div class="table-responsive">
                             <table class="table instructor-table" id="sessionsTable">
                                 <thead>
@@ -124,16 +124,16 @@
                                     {% for sessionData in sessions %}
                                         <tr data-course="{{ sessionData.course.title }}">
                                             <td><strong>{{ sessionData.course.title }}</strong></td>
-                                            <td>{{ sessionData.session.date|date('Y-m-d') }}</td>
-                                            <td>{{ sessionData.session.startTime|date('H:i') }} - {{ sessionData.session.endTime|date('H:i') }}</td>
+                                            <td>{{ sessionData.session.startDate|date('Y-m-d') }}{% if sessionData.session.startDate != sessionData.session.endDate %} to {{ sessionData.session.endDate|date('Y-m-d') }}{% endif %}</td>
+                                            <td>{{ sessionData.session.time|date('H:i') }}</td>
                                             <td>
                                                 {% set now = "now"|date('Y-m-d') %}
-                                                {% if sessionData.session.date|date('Y-m-d') > now %}
+                                                {% if sessionData.session.startDate|date('Y-m-d') > now %}
                                                     <span class="badge-instructor badge-success">Upcoming</span>
-                                                {% elseif sessionData.session.date|date('Y-m-d') < now %}
+                                                {% elseif sessionData.session.endDate|date('Y-m-d') < now %}
                                                     <span class="badge-instructor badge-info">Completed</span>
                                                 {% else %}
-                                                    <span class="badge-instructor badge-warning">Today</span>
+                                                    <span class="badge-instructor badge-warning">In Progress</span>
                                                 {% endif %}
                                             </td>
                                             <td>
@@ -189,24 +189,24 @@
                             <h6 class="fw-semibold">Course</h6>
                             <p>{{ sessionData.course.title }}</p>
                         </div>
-                        
+
                         <div class="mb-3">
                             <h6 class="fw-semibold">Date & Time</h6>
-                            <p>{{ sessionData.session.date|date('Y-m-d') }}, {{ sessionData.session.startTime|date('H:i') }} - {{ sessionData.session.endTime|date('H:i') }}</p>
+                            <p>{{ sessionData.session.startDate|date('Y-m-d') }}{% if sessionData.session.startDate != sessionData.session.endDate %} to {{ sessionData.session.endDate|date('Y-m-d') }}{% endif %}, {{ sessionData.session.time|date('H:i') }}</p>
                         </div>
-                        
+
                         <div class="mb-3">
                             <h6 class="fw-semibold">Status</h6>
                             {% set now = "now"|date('Y-m-d') %}
-                            {% if sessionData.session.date|date('Y-m-d') > now %}
+                            {% if sessionData.session.startDate|date('Y-m-d') > now %}
                                 <span class="badge-instructor badge-success">Upcoming</span>
-                            {% elseif sessionData.session.date|date('Y-m-d') < now %}
+                            {% elseif sessionData.session.endDate|date('Y-m-d') < now %}
                                 <span class="badge-instructor badge-info">Completed</span>
                             {% else %}
-                                <span class="badge-instructor badge-warning">Today</span>
+                                <span class="badge-instructor badge-warning">In Progress</span>
                             {% endif %}
                         </div>
-                        
+
                         <div class="mb-3">
                             <h6 class="fw-semibold">Attendance</h6>
                             {% if sessionData.session.date|date('Y-m-d') < now %}
@@ -219,7 +219,7 @@
                                 <span class="badge bg-label-secondary">N/A</span>
                             {% endif %}
                         </div>
-                        
+
                         <div class="mb-3">
                             <h6 class="fw-semibold">Progress</h6>
                             <div class="progress mb-2" style="height: 8px;">
@@ -227,7 +227,7 @@
                             </div>
                             <small class="text-muted">{{ sessionData.progress }}% completed</small>
                         </div>
-                        
+
                         <div class="mb-3">
                             <h6 class="fw-semibold">Enrollment Date</h6>
                             <p>{{ sessionData.enrollment.createdAt is defined and sessionData.enrollment.createdAt ? sessionData.enrollment.createdAt|date('Y-m-d') : 'N/A' }}</p>
@@ -241,7 +241,7 @@
             </div>
         </div>
     {% endfor %}
-    
+
     <!-- Filter Modal -->
     <div class="modal fade instructor-modal" id="filterModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -286,7 +286,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Export Modal -->
     <div class="modal fade instructor-modal" id="exportModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -329,25 +329,25 @@
             </div>
         </div>
     </div>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Search functionality
             const searchInput = document.getElementById('searchSessions');
             const table = document.getElementById('sessionsTable');
             const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-            
+
             searchInput.addEventListener('keyup', function() {
                 const searchText = searchInput.value.toLowerCase();
-                
+
                 for (let i = 0; i < rows.length; i++) {
                     const courseCell = rows[i].querySelector('td:nth-child(1)');
                     const dateCell = rows[i].querySelector('td:nth-child(2)');
-                    
+
                     if (courseCell && dateCell) {
                         const course = courseCell.textContent || courseCell.innerText;
                         const date = dateCell.textContent || dateCell.innerText;
-                        
+
                         if (course.toLowerCase().indexOf(searchText) > -1 || date.indexOf(searchText) > -1) {
                             rows[i].style.display = '';
                         } else {
@@ -356,11 +356,11 @@
                     }
                 }
             });
-            
+
             // Filter functionality
             const filterForm = document.getElementById('filterForm');
             const applyFiltersBtn = document.getElementById('applyFilters');
-            
+
             if (applyFiltersBtn) {
                 applyFiltersBtn.addEventListener('click', function() {
                     // Get filter values
@@ -368,11 +368,11 @@
                     const attendance = filterForm.querySelector('select[name="attendance"]')?.value || '';
                     const startDate = filterForm.querySelector('input[name="startDate"]')?.value || '';
                     const endDate = filterForm.querySelector('input[name="endDate"]')?.value || '';
-                    
+
                     // Apply filters
                     for (let i = 0; i < rows.length; i++) {
                         let showRow = true;
-                        
+
                         // Filter by status
                         if (status && showRow) {
                             const statusCell = rows[i].querySelector('td:nth-child(4)');
@@ -383,7 +383,7 @@
                                 }
                             }
                         }
-                        
+
                         // Filter by attendance
                         if (attendance && showRow) {
                             const attendanceCell = rows[i].querySelector('td:nth-child(5)');
@@ -396,20 +396,20 @@
                                 }
                             }
                         }
-                        
+
                         // Filter by date range
                         if ((startDate || endDate) && showRow) {
                             const dateCell = rows[i].querySelector('td:nth-child(2)');
                             if (dateCell) {
                                 const sessionDate = new Date(dateCell.textContent.trim());
-                                
+
                                 if (startDate) {
                                     const filterStartDate = new Date(startDate);
                                     if (sessionDate < filterStartDate) {
                                         showRow = false;
                                     }
                                 }
-                                
+
                                 if (endDate && showRow) {
                                     const filterEndDate = new Date(endDate);
                                     if (sessionDate > filterEndDate) {
@@ -418,11 +418,11 @@
                                 }
                             }
                         }
-                        
+
                         // Show or hide row based on filters
                         rows[i].style.display = showRow ? '' : 'none';
                     }
-                    
+
                     // Close the modal
                     const filterModal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
                     filterModal.hide();

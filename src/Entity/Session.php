@@ -16,14 +16,14 @@ class Session
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $date = null;
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTimeInterface $startDate = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTimeInterface $endDate = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
-    private ?\DateTimeInterface $startTime = null;
-
-    #[ORM\Column(type: Types::TIME_MUTABLE)]
-    private ?\DateTimeInterface $endTime = null;
+    private ?\DateTimeInterface $time = null;
 
     #[ORM\ManyToOne(inversedBy: 'sessions')]
     private ?Course $course = null;
@@ -62,40 +62,93 @@ class Session
         return $this->id;
     }
 
+    public function getStartDate(): ?\DateTimeInterface
+    {
+        return $this->startDate;
+    }
+
+    public function setStartDate(\DateTimeInterface $startDate): static
+    {
+        $this->startDate = $startDate;
+
+        return $this;
+    }
+
+    public function getEndDate(): ?\DateTimeInterface
+    {
+        return $this->endDate;
+    }
+
+    public function setEndDate(\DateTimeInterface $endDate): static
+    {
+        $this->endDate = $endDate;
+
+        return $this;
+    }
+
+    public function getTime(): ?\DateTimeInterface
+    {
+        return $this->time;
+    }
+
+    public function setTime(\DateTimeInterface $time): static
+    {
+        $this->time = $time;
+
+        return $this;
+    }
+
+    // Backward compatibility methods
     public function getDate(): ?\DateTimeInterface
     {
-        return $this->date;
+        return $this->startDate;
     }
 
     public function setDate(\DateTimeInterface $date): static
     {
-        $this->date = $date;
+        // Create a new DateTime object with just the date part
+        $newDate = new \DateTime($date->format('Y-m-d'));
+        $this->startDate = $newDate;
+
+        // If endDate doesn't exist, set it to the same as startDate
+        if ($this->endDate === null) {
+            $this->endDate = clone $newDate;
+        }
 
         return $this;
     }
 
     public function getStartTime(): ?\DateTimeInterface
     {
-        return $this->startTime;
+        return $this->time;
     }
 
     public function setStartTime(\DateTimeInterface $startTime): static
     {
-        $this->startTime = $startTime;
+        // Create a new time object
+        $newTime = new \DateTime();
+        $newTime->setTime(
+            (int)$startTime->format('H'),
+            (int)$startTime->format('i'),
+            (int)$startTime->format('s')
+        );
+
+        $this->time = $newTime;
 
         return $this;
     }
 
     public function getEndTime(): ?\DateTimeInterface
     {
-        return $this->endTime;
+        // For backward compatibility, we return the same time
+        return $this->time;
     }
 
     public function setEndTime(\DateTimeInterface $endTime): static
     {
-        $this->endTime = $endTime;
-
-        return $this;
+        // For backward compatibility, we set the same time
+        // This is a simplification since we now have a single time field
+        return $this->setStartTime($endTime);
     }
 
     public function getCourse(): ?Course
