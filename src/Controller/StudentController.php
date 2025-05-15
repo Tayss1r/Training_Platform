@@ -4,11 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Announcement;
 use App\Entity\AnnouncementRead;
+use App\Entity\Enrollment;
 use App\Entity\Session;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Controller\BaseController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -24,6 +24,47 @@ class StudentController extends BaseController
     public function dashboard(): Response
     {
         return $this->render('student/dashboard.html.twig');
+    }
+
+    #[Route('/schedule', name: 'student_schedule')]
+    public function schedule(EntityManagerInterface $entityManager): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // Get all enrollments for the user
+        $enrollments = $entityManager->getRepository(Enrollment::class)->findBy(['users' => $user]);
+
+        // Get all sessions from these enrollments
+        $enrolledSessions = [];
+        $upcomingSessions = [];
+        $now = new \DateTime();
+
+        foreach ($enrollments as $enrollment) {
+            $session = $enrollment->getSession();
+            if ($session) {
+                $enrolledSessions[] = $session;
+
+                // Check if the session is upcoming
+                if ($session->getStartDate() > $now) {
+                    $upcomingSessions[] = $session;
+                }
+            }
+        }
+
+        // Sort upcoming sessions by date
+        usort($upcomingSessions, function ($a, $b) {
+            return $a->getStartDate() <=> $b->getStartDate();
+        });
+
+        // Limit to the next 5 sessions
+        $upcomingSessions = array_slice($upcomingSessions, 0, 5);
+
+        return $this->render('student/schedule_new.html.twig', [
+            'enrolledSessions' => $enrolledSessions,
+            'upcomingSessions' => $upcomingSessions,
+            'unreadAnnouncementsCount' => $this->getUnreadAnnouncementsCount()
+        ]);
     }
 
     #[Route('/announcements', name: 'student_announcements')]

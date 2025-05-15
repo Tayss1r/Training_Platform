@@ -309,38 +309,39 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li>
-                                    <a class="dropdown-item" href="#">
-                                        <div class="d-flex">
+                                    <div class="dropdown-item p-4">
+                                        <div class="d-flex align-items-center">
                                             <div class="flex-shrink-0 me-3">
                                                 <div class="avatar avatar-online">
                                                     {% if app.user %}
-                                                        <img src="{{ asset('assets/img/avatars/' ~ app.user.image) }}" alt="User Avatar" class="w-px-40 h-auto rounded-circle" />
+                                                        <img src="{{ asset('assets/img/avatars/' ~ app.user.image) }}" alt="User Avatar" class="w-px-50 h-auto rounded-circle" />
                                                     {% else %}
-                                                        <img src="{{ asset('assets/img/avatars/6.png') }}" alt="Default Avatar" class="w-px-40 h-auto rounded-circle" />
+                                                        <img src="{{ asset('assets/img/avatars/6.png') }}" alt="Default Avatar" class="w-px-50 h-auto rounded-circle" />
                                                     {% endif %}
                                                 </div>
                                             </div>
                                             <div class="flex-grow-1">
                                                 {% if app.user %}
-                                                    <span class="fw-semibold d-block">{{ app.user.email|split('@')[0] }}</span>
-                                                    <small class="text-muted">
+                                                    <h5 class="mb-0">{{ app.user.firstName }} {{ app.user.lastName }}</h5>
+                                                    <p class="mb-0 text-muted small">{{ app.user.email }}</p>
+                                                    <div class="mt-1">
                                                         {% if 'ROLE_ADMIN' in app.user.roles %}
-                                                            Admin
+                                                            <span class="badge bg-label-primary">Administrator</span>
                                                         {% elseif 'ROLE_INSTRUCTOR' in app.user.roles %}
-                                                            Instructor
+                                                            <span class="badge bg-label-info">Instructor</span>
                                                         {% elseif 'ROLE_USER' in app.user.roles %}
-                                                            User
+                                                            <span class="badge bg-label-success">Student</span>
                                                         {% else %}
-                                                            Unknown Role
+                                                            <span class="badge bg-label-secondary">Unknown Role</span>
                                                         {% endif %}
-                                                    </small>
+                                                    </div>
                                                 {% else %}
-                                                    <span class="fw-semibold d-block">Guest</span>
-                                                    <small class="text-muted">No role assigned</small>
+                                                    <h5 class="mb-0">Welcome, Guest!</h5>
+                                                    <p class="mb-0 text-muted small">Please login or register</p>
                                                 {% endif %}
                                             </div>
                                         </div>
-                                    </a>
+                                    </div>
                                 </li>
                                 <li>
                                     <div class="dropdown-divider"></div>
@@ -348,45 +349,60 @@
                                 {% if app.user %}
                                     {% if is_granted('ROLE_ADMIN') %}
                                         <li>
-                                            <a class="dropdown-item" href="{{ path('admin_dashboard') }}">
-                                                <i class="bx bx-home-circle me-2"></i>
-                                                <span class="align-middle">Admin Dashboard</span>
+                                            <h6 class="dropdown-header text-uppercase">Admin Panel</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_dashboard') }}">
+                                                <i class="bx bx-home-circle me-2 text-primary"></i>
+                                                <span class="align-middle">Dashboard</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase mt-2">Content Management</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_courses') }}">
+                                                <i class="bx bx-book me-2 text-info"></i>
+                                                <span class="align-middle">Courses</span>
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="{{ path('admin_courses') }}">
-                                                <i class="bx bx-book me-2"></i>
-                                                <span class="align-middle">Manage Courses</span>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_sessions') }}">
+                                                <i class="bx bx-calendar me-2 text-success"></i>
+                                                <span class="align-middle">Sessions</span>
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="{{ path('admin_sessions') }}">
-                                                <i class="bx bx-calendar me-2"></i>
-                                                <span class="align-middle">Manage Sessions</span>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_categories') }}">
+                                                <i class="bx bx-category me-2 text-warning"></i>
+                                                <span class="align-middle">Categories</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase mt-2">User Management</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_users') }}">
+                                                <i class="bx bx-user-circle me-2 text-danger"></i>
+                                                <span class="align-middle">Users</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase mt-2">System</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_reports') }}">
+                                                <i class="bx bx-line-chart me-2 text-secondary"></i>
+                                                <span class="align-middle">Reports</span>
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="{{ path('admin_users') }}">
-                                                <i class="bx bx-user-circle me-2"></i>
-                                                <span class="align-middle">Manage Users</span>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('admin_categories') }}">
-                                                <i class="bx bx-category me-2"></i>
-                                                <span class="align-middle">Manage Categories</span>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('admin_reports') }}">
-                                                <i class="bx bx-line-chart me-2"></i>
-                                                <span class="align-middle">System Reports</span>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('admin_settings') }}">
-                                                <i class="bx bx-cog me-2"></i>
-                                                <span class="align-middle">System Settings</span>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_settings') }}">
+                                                <i class="bx bx-cog me-2 text-dark"></i>
+                                                <span class="align-middle">Settings</span>
                                             </a>
                                         </li>
                                         <li>
@@ -396,32 +412,44 @@
 
                                     {% if is_granted('ROLE_INSTRUCTOR') %}
                                         <li>
-                                            <a class="dropdown-item" href="{{ path('instructor_dashboard') }}">
-                                                <i class="bx bx-home-circle me-2"></i>
-                                                <span class="align-middle">Instructor Dashboard</span>
+                                            <h6 class="dropdown-header text-uppercase">Instructor Portal</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('instructor_dashboard') }}">
+                                                <i class="bx bx-home-circle me-2 text-primary"></i>
+                                                <span class="align-middle">Dashboard</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase mt-2">Teaching</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('instructor_sessions') }}">
+                                                <i class="bx bx-calendar-check me-2 text-success"></i>
+                                                <span class="align-middle">My Sessions</span>
+                                                <span class="badge rounded-pill bg-success ms-auto">Active</span>
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="{{ path('instructor_sessions') }}">
-                                                <i class="bx bx-calendar-check me-2"></i>
-                                                <span class="align-middle">My Teaching Sessions</span>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('instructor_students') }}">
-                                                <i class="bx bx-user-check me-2"></i>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('instructor_students') }}">
+                                                <i class="bx bx-user-check me-2 text-info"></i>
                                                 <span class="align-middle">My Students</span>
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="{{ path('instructor_materials') }}">
-                                                <i class="bx bx-file me-2"></i>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('instructor_materials') }}">
+                                                <i class="bx bx-file me-2 text-warning"></i>
                                                 <span class="align-middle">Course Materials</span>
                                             </a>
                                         </li>
+
                                         <li>
-                                            <a class="dropdown-item" href="{{ path('instructor_analytics') }}">
-                                                <i class="bx bx-bar-chart-alt-2 me-2"></i>
+                                            <h6 class="dropdown-header text-uppercase mt-2">Performance</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('instructor_analytics') }}">
+                                                <i class="bx bx-bar-chart-alt-2 me-2 text-danger"></i>
                                                 <span class="align-middle">Analytics</span>
                                             </a>
                                         </li>
@@ -432,18 +460,38 @@
 
                                     {% if is_granted('ROLE_USER') and not is_granted('ROLE_ADMIN') and not is_granted('ROLE_INSTRUCTOR') %}
                                         <li>
-                                            <a class="dropdown-item" href="{{ path('student_announcements') }}">
-                                                <i class="bx bx-bell me-2"></i>
+                                            <h6 class="dropdown-header text-uppercase">Student Portal</h6>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('student_announcements') }}">
+                                                <i class="bx bx-bell me-2 text-danger"></i>
                                                 <span class="align-middle">Announcements</span>
                                                 {% if unreadAnnouncementsCount is defined and unreadAnnouncementsCount > 0 %}
-                                                    <span class="badge rounded-pill bg-danger ms-2">{{ unreadAnnouncementsCount }}</span>
+                                                    <span class="badge rounded-pill bg-danger ms-auto">{{ unreadAnnouncementsCount }}</span>
                                                 {% endif %}
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="{{ path('my_enrollments') }}">
-                                                <i class="bx bx-book-open me-2"></i>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('my_enrollments') }}">
+                                                <i class="bx bx-book-open me-2 text-primary"></i>
                                                 <span class="align-middle">My Enrollments</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase mt-2">Quick Actions</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('home') }}">
+                                                <i class="bx bx-search me-2 text-info"></i>
+                                                <span class="align-middle">Browse Courses</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('student_schedule') }}">
+                                                <i class="bx bx-calendar me-2 text-success"></i>
+                                                <span class="align-middle">My Schedule</span>
                                             </a>
                                         </li>
                                         <li>
@@ -451,37 +499,64 @@
                                         </li>
                                     {% endif %}
                                     <li>
-                                        <a class="dropdown-item" href="{{ path('app_user_profile') }}">
-                                            <i class="bx bx-user me-2"></i>
+                                        <h6 class="dropdown-header text-uppercase">Account</h6>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('app_user_profile') }}">
+                                            <i class="bx bx-user me-2 text-primary"></i>
                                             <span class="align-middle">My Profile</span>
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{{ path('app_user_settings') }}">
-                                            <i class="bx bx-cog me-2"></i>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('app_user_settings') }}">
+                                            <i class="bx bx-cog me-2 text-secondary"></i>
                                             <span class="align-middle">Settings</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('help_center') }}">
+                                            <i class="bx bx-help-circle me-2 text-info"></i>
+                                            <span class="align-middle">Help Center</span>
                                         </a>
                                     </li>
                                     <li>
                                         <div class="dropdown-divider"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{{ path('app_logout') }}">
+                                        <a class="dropdown-item d-flex align-items-center text-danger" href="{{ path('app_logout') }}">
                                             <i class="bx bx-power-off me-2"></i>
                                             <span class="align-middle">Logout</span>
                                         </a>
                                     </li>
                                 {% else %}
                                     <li>
-                                        <a class="dropdown-item" href="{{ path('app_login') }}">
-                                            <i class="bx bx-log-in me-2"></i>
+                                        <h6 class="dropdown-header text-uppercase">Welcome, Guest!</h6>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('app_login') }}">
+                                            <i class="bx bx-log-in me-2 text-primary"></i>
                                             <span class="align-middle">Login</span>
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{{ path('app_register') }}">
-                                            <i class="bx bx-user-plus me-2"></i>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('app_register') }}">
+                                            <i class="bx bx-user-plus me-2 text-success"></i>
                                             <span class="align-middle">Register</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-divider"></div>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('home') }}">
+                                            <i class="bx bx-book me-2 text-info"></i>
+                                            <span class="align-middle">Browse Courses</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('help_center') }}">
+                                            <i class="bx bx-help-circle me-2 text-secondary"></i>
+                                            <span class="align-middle">Help Center</span>
                                         </a>
                                     </li>
                                 {% endif %}
@@ -535,6 +610,9 @@
 
 <!-- Main JS -->
 <script src="{{ asset('vendor/js/main.js') }}"></script>
+
+<!-- Custom fixes -->
+<script src="{{ asset('assets/js/fixes.js') }}"></script>
 
 <!-- Page JS -->
 {% block javascripts %}{% endblock %}
