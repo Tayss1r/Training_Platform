@@ -32,37 +32,37 @@ class SessionType extends AbstractType
                     ]),
                 ],
             ])
-            ->add('date', DateType::class, [
+            ->add('startDate', DateType::class, [
                 'widget' => 'single_text',
-                'label' => 'Date',
+                'label' => 'Start Date',
                 'required' => true,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select a date',
+                        'message' => 'Please select a start date',
                     ]),
                     new GreaterThan([
                         'value' => 'today',
-                        'message' => 'The date must be in the future',
+                        'message' => 'The start date must be in the future',
                     ]),
                 ],
             ])
-            ->add('startTime', TimeType::class, [
+            ->add('endDate', DateType::class, [
                 'widget' => 'single_text',
-                'label' => 'Start Time',
+                'label' => 'End Date',
                 'required' => true,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select a start time',
+                        'message' => 'Please select an end date',
                     ]),
                 ],
             ])
-            ->add('endTime', TimeType::class, [
+            ->add('time', TimeType::class, [
                 'widget' => 'single_text',
-                'label' => 'End Time',
+                'label' => 'Time',
                 'required' => true,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an end time',
+                        'message' => 'Please select a time',
                     ]),
                 ],
             ])
@@ -90,4 +90,4 @@ class SessionType extends AbstractType
             'data_class' => Session::class,
         ]);
     }
-} 
+}

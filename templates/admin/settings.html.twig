@@ -1,0 +1,364 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}System Settings{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4">
+            <span class="text-muted fw-light">Admin /</span> System Settings
+        </h4>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="nav nav-pills mb-3" id="settings-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ activeTab == 'general' ? 'active' : '' }}" id="general-tab" data-bs-toggle="pill" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="{{ activeTab == 'general' ? 'true' : 'false' }}">
+                            <i class="bx bx-cog me-1"></i> General
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ activeTab == 'email' ? 'active' : '' }}" id="email-tab" data-bs-toggle="pill" data-bs-target="#email" type="button" role="tab" aria-controls="email" aria-selected="{{ activeTab == 'email' ? 'true' : 'false' }}">
+                            <i class="bx bx-envelope me-1"></i> Email
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ activeTab == 'security' ? 'active' : '' }}" id="security-tab" data-bs-toggle="pill" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="{{ activeTab == 'security' ? 'true' : 'false' }}">
+                            <i class="bx bx-lock-alt me-1"></i> Security
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ activeTab == 'appearance' ? 'active' : '' }}" id="appearance-tab" data-bs-toggle="pill" data-bs-target="#appearance" type="button" role="tab" aria-controls="appearance" aria-selected="{{ activeTab == 'appearance' ? 'true' : 'false' }}">
+                            <i class="bx bx-palette me-1"></i> Appearance
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ activeTab == 'maintenance' ? 'active' : '' }}" id="maintenance-tab" data-bs-toggle="pill" data-bs-target="#maintenance" type="button" role="tab" aria-controls="maintenance" aria-selected="{{ activeTab == 'maintenance' ? 'true' : 'false' }}">
+                            <i class="bx bx-wrench me-1"></i> Maintenance
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="settings-tabContent">
+                    <!-- General Settings -->
+                    <div class="tab-pane fade {{ activeTab == 'general' ? 'show active' : '' }}" id="general" role="tabpanel" aria-labelledby="general-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">General Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" action="{{ path('admin_settings') }}">
+                                    <input type="hidden" name="category" value="general">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Site Name</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" name="site_name" class="form-control" value="{{ generalSettings.site_name|default('Forminy') }}">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Site Description</label>
+                                        <div class="col-sm-9">
+                                            <textarea name="site_description" class="form-control" rows="3">{{ generalSettings.site_description|default('A comprehensive learning management system for educational institutions.') }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Admin Email</label>
+                                        <div class="col-sm-9">
+                                            <input type="email" name="admin_email" class="form-control" value="{{ generalSettings.admin_email|default('admin@forminy.com') }}">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Time Zone</label>
+                                        <div class="col-sm-9">
+                                            <select name="timezone" class="form-select">
+                                                <option value="UTC" {{ generalSettings.timezone == 'UTC' ? 'selected' : '' }}>UTC</option>
+                                                <option value="America/New_York" {{ generalSettings.timezone == 'America/New_York' ? 'selected' : '' }}>America/New_York</option>
+                                                <option value="Europe/London" {{ generalSettings.timezone == 'Europe/London' ? 'selected' : '' }}>Europe/London</option>
+                                                <option value="Asia/Tokyo" {{ generalSettings.timezone == 'Asia/Tokyo' ? 'selected' : '' }}>Asia/Tokyo</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Date Format</label>
+                                        <div class="col-sm-9">
+                                            <select name="date_format" class="form-select">
+                                                <option value="Y-m-d" {{ generalSettings.date_format == 'Y-m-d' ? 'selected' : '' }}>YYYY-MM-DD</option>
+                                                <option value="m/d/Y" {{ generalSettings.date_format == 'm/d/Y' ? 'selected' : '' }}>MM/DD/YYYY</option>
+                                                <option value="d/m/Y" {{ generalSettings.date_format == 'd/m/Y' ? 'selected' : '' }}>DD/MM/YYYY</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-9 offset-sm-3">
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Settings -->
+                    <div class="tab-pane fade {{ activeTab == 'email' ? 'show active' : '' }}" id="email" role="tabpanel" aria-labelledby="email-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Email Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" action="{{ path('admin_settings') }}">
+                                    <input type="hidden" name="category" value="email">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">SMTP Host</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" name="smtp_host" class="form-control" value="{{ emailSettings.smtp_host|default('smtp.example.com') }}">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">SMTP Port</label>
+                                        <div class="col-sm-9">
+                                            <input type="number" name="smtp_port" class="form-control" value="{{ emailSettings.smtp_port|default('587') }}">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">SMTP Username</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" name="smtp_username" class="form-control" value="{{ emailSettings.smtp_username|default('user@example.com') }}">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">SMTP Password</label>
+                                        <div class="col-sm-9">
+                                            <input type="password" name="smtp_password" class="form-control" value="{{ emailSettings.smtp_password|default('password') }}">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Encryption</label>
+                                        <div class="col-sm-9">
+                                            <select name="smtp_encryption" class="form-select">
+                                                <option value="tls" {{ emailSettings.smtp_encryption == 'tls' ? 'selected' : '' }}>TLS</option>
+                                                <option value="ssl" {{ emailSettings.smtp_encryption == 'ssl' ? 'selected' : '' }}>SSL</option>
+                                                <option value="none" {{ emailSettings.smtp_encryption == 'none' ? 'selected' : '' }}>None</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">From Email</label>
+                                        <div class="col-sm-9">
+                                            <input type="email" name="from_email" class="form-control" value="{{ emailSettings.from_email|default('noreply@forminy.com') }}">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">From Name</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" name="from_name" class="form-control" value="{{ emailSettings.from_name|default('Forminy LMS') }}">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-9 offset-sm-3">
+                                            <button type="button" class="btn btn-info me-2">Test Connection</button>
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="tab-pane fade {{ activeTab == 'security' ? 'show active' : '' }}" id="security" role="tabpanel" aria-labelledby="security-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Security Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" action="{{ path('admin_settings') }}">
+                                    <input type="hidden" name="category" value="security">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Password Policy</label>
+                                        <div class="col-sm-9">
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="minLength" name="password_min_length" value="1" {{ securitySettings.password_min_length == '1' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="minLength">Minimum 8 characters</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="uppercase" name="password_require_uppercase" value="1" {{ securitySettings.password_require_uppercase == '1' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="uppercase">Require uppercase letters</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="numbers" name="password_require_numbers" value="1" {{ securitySettings.password_require_numbers == '1' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="numbers">Require numbers</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="special" name="password_require_special" value="1" {{ securitySettings.password_require_special == '1' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="special">Require special characters</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Session Timeout</label>
+                                        <div class="col-sm-9">
+                                            <select name="session_timeout" class="form-select">
+                                                <option value="15" {{ securitySettings.session_timeout == '15' ? 'selected' : '' }}>15 minutes</option>
+                                                <option value="30" {{ securitySettings.session_timeout == '30' ? 'selected' : '' }}>30 minutes</option>
+                                                <option value="60" {{ securitySettings.session_timeout == '60' ? 'selected' : '' }}>1 hour</option>
+                                                <option value="120" {{ securitySettings.session_timeout == '120' ? 'selected' : '' }}>2 hours</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Login Attempts</label>
+                                        <div class="col-sm-9">
+                                            <select name="login_attempts" class="form-select">
+                                                <option value="3" {{ securitySettings.login_attempts == '3' ? 'selected' : '' }}>3 attempts</option>
+                                                <option value="5" {{ securitySettings.login_attempts == '5' ? 'selected' : '' }}>5 attempts</option>
+                                                <option value="10" {{ securitySettings.login_attempts == '10' ? 'selected' : '' }}>10 attempts</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Two-Factor Authentication</label>
+                                        <div class="col-sm-9">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="twoFactorAuth" name="two_factor_auth" value="1" {{ securitySettings.two_factor_auth == '1' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="twoFactorAuth">Enable for all users</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-9 offset-sm-3">
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Appearance Settings -->
+                    <div class="tab-pane fade {{ activeTab == 'appearance' ? 'show active' : '' }}" id="appearance" role="tabpanel" aria-labelledby="appearance-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Appearance Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" action="{{ path('admin_settings') }}" enctype="multipart/form-data">
+                                    <input type="hidden" name="category" value="appearance">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Theme</label>
+                                        <div class="col-sm-9">
+                                            <select name="theme" class="form-select">
+                                                <option value="default" {{ appearanceSettings.theme == 'default' ? 'selected' : '' }}>Default</option>
+                                                <option value="dark" {{ appearanceSettings.theme == 'dark' ? 'selected' : '' }}>Dark</option>
+                                                <option value="light" {{ appearanceSettings.theme == 'light' ? 'selected' : '' }}>Light</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Primary Color</label>
+                                        <div class="col-sm-9">
+                                            <input type="color" name="primary_color" class="form-control form-control-color" value="{{ appearanceSettings.primary_color|default('#696cff') }}">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Logo</label>
+                                        <div class="col-sm-9">
+                                            <input type="file" name="logo" class="form-control">
+                                            <small class="text-muted">Recommended size: 200x50 pixels</small>
+                                            {% if appearanceSettings.logo %}
+                                                <div class="mt-2">
+                                                    <img src="{{ asset('assets/img/logos/' ~ appearanceSettings.logo) }}" alt="Logo" height="50">
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Favicon</label>
+                                        <div class="col-sm-9">
+                                            <input type="file" name="favicon" class="form-control">
+                                            <small class="text-muted">Recommended size: 32x32 pixels</small>
+                                            {% if appearanceSettings.favicon %}
+                                                <div class="mt-2">
+                                                    <img src="{{ asset('assets/img/favicons/' ~ appearanceSettings.favicon) }}" alt="Favicon" height="32">
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-9 offset-sm-3">
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Maintenance Settings -->
+                    <div class="tab-pane fade {{ activeTab == 'maintenance' ? 'show active' : '' }}" id="maintenance" role="tabpanel" aria-labelledby="maintenance-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Maintenance Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" action="{{ path('admin_settings') }}">
+                                    <input type="hidden" name="category" value="maintenance">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Maintenance Mode</label>
+                                        <div class="col-sm-9">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="maintenanceMode" name="maintenance_mode" value="1" {{ maintenanceSettings.maintenance_mode == '1' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="maintenanceMode">Enable maintenance mode</label>
+                                            </div>
+                                            <small class="text-muted">When enabled, only administrators can access the site.</small>
+                                            <div class="mt-2">
+                                                <a href="{{ path('admin_toggle_maintenance', {'state': 'on'}) }}" class="btn btn-sm btn-danger me-2">Force Enable</a>
+                                                <a href="{{ path('admin_toggle_maintenance', {'state': 'off'}) }}" class="btn btn-sm btn-success me-2">Force Disable</a>
+                                                <a href="{{ path('admin_view_settings') }}" target="_blank" class="btn btn-sm btn-info">View Settings</a>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small class="text-muted">Current maintenance mode value: <strong>{{ maintenanceSettings.maintenance_mode == '1' ? 'Enabled' : 'Disabled' }}</strong></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Maintenance Message</label>
+                                        <div class="col-sm-9">
+                                            <textarea name="maintenance_message" class="form-control" rows="3">{{ maintenanceSettings.maintenance_message|default('We are currently performing scheduled maintenance. Please check back soon.') }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Database Backup</label>
+                                        <div class="col-sm-9">
+                                            <a href="{{ path('admin_backup_database') }}" class="btn btn-info">Backup Now</a>
+                                            <small class="d-block mt-2 text-muted">Last backup: Never</small>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Clear Cache</label>
+                                        <div class="col-sm-9">
+                                            <a href="{{ path('admin_clear_cache') }}" class="btn btn-warning">Clear Cache</a>
+                                            <small class="d-block mt-2 text-muted">This will clear all application caches.</small>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-9 offset-sm-3">
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

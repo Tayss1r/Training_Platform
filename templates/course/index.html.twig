@@ -12,13 +12,13 @@
 <div class="row">
     {% for course in courses %}
         <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">{{ course.title }}</h5>
-                    <p class="card-text">{{ course.description|slice(0, 100) }}...</p>
-                    <a href="{{ path('course_show', {'id': course.id}) }}" class="btn btn-primary">View Course</a>
-                </div>
-            </div>
+            {% if course.createdAt and course.createdAt|date_modify('+7 days') > date() %}
+                <div class="new-badge">New</div>
+            {% endif %}
+            {% include 'components/_course_card.html.twig' with {
+                'course': course,
+                'showCreatedAt': true
+            } %}
         </div>
     {% else %}
         <div class="col-12">

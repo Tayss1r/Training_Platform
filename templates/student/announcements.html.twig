@@ -1,0 +1,222 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Announcements{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .announcement-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .announcement-card.unread {
+            border-left: 4px solid #696cff;
+            background-color: rgba(105, 108, 255, 0.05);
+        }
+        
+        .announcement-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.25rem 1rem rgba(161, 172, 184, 0.45);
+        }
+        
+        .announcement-date {
+            font-size: 0.85rem;
+            color: #697a8d;
+        }
+        
+        .announcement-session {
+            font-size: 0.85rem;
+            color: #697a8d;
+            font-weight: 500;
+        }
+        
+        .announcement-message {
+            white-space: pre-line;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4">
+            <span class="text-muted fw-light">Student /</span> Announcements
+        </h4>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Announcements</h5>
+                        <div>
+                            <button type="button" id="markAllReadBtn" class="btn btn-sm btn-primary">
+                                <i class="bx bx-check-double me-1"></i> Mark All as Read
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        {% if announcements is empty %}
+                            <div class="text-center py-5">
+                                <div class="mb-3">
+                                    <i class="bx bx-message-square-detail bx-lg text-primary"></i>
+                                </div>
+                                <h5>No announcements yet</h5>
+                                <p class="text-muted">When your instructors send announcements, they will appear here.</p>
+                            </div>
+                        {% else %}
+                            <div class="announcements-list">
+                                {% for announcement in announcements %}
+                                    <div class="card announcement-card mb-3 {% if not announcement.isRead %}unread{% endif %}" data-id="{{ announcement.id }}">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <h5 class="card-title mb-0">{{ announcement.subject }}</h5>
+                                                <span class="badge bg-label-primary">{{ announcement.session }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <div>
+                                                    <span class="text-muted">From: {{ announcement.sender }}</span>
+                                                </div>
+                                                <div class="announcement-date">
+                                                    {{ announcement.date }}
+                                                </div>
+                                            </div>
+                                            <p class="card-text announcement-message">{{ announcement.message }}</p>
+                                            {% if not announcement.isRead %}
+                                                <button type="button" class="btn btn-sm btn-outline-primary mark-read-btn" data-id="{{ announcement.id }}">
+                                                    <i class="bx bx-check me-1"></i> Mark as Read
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toast notification setup
+            const toastNotification = {
+                success: function(options) {
+                    Toastify({
+                        text: options.message,
+                        duration: 3000,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        style: {
+                            background: "#71dd37",
+                        },
+                        onClick: function(){}
+                    }).showToast();
+                },
+                error: function(options) {
+                    Toastify({
+                        text: options.message,
+                        duration: 3000,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        style: {
+                            background: "#ff3e1d",
+                        },
+                        onClick: function(){}
+                    }).showToast();
+                }
+            };
+            
+            // Mark announcement as read
+            const markReadButtons = document.querySelectorAll('.mark-read-btn');
+            markReadButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const announcementId = this.getAttribute('data-id');
+                    markAnnouncementAsRead(announcementId, this);
+                });
+            });
+            
+            // Mark all announcements as read
+            const markAllReadBtn = document.getElementById('markAllReadBtn');
+            if (markAllReadBtn) {
+                markAllReadBtn.addEventListener('click', function() {
+                    const unreadAnnouncements = document.querySelectorAll('.announcement-card.unread');
+                    if (unreadAnnouncements.length === 0) {
+                        toastNotification.info({
+                            message: 'No unread announcements to mark'
+                        });
+                        return;
+                    }
+                    
+                    unreadAnnouncements.forEach(card => {
+                        const announcementId = card.getAttribute('data-id');
+                        const markReadBtn = card.querySelector('.mark-read-btn');
+                        markAnnouncementAsRead(announcementId, markReadBtn);
+                    });
+                });
+            }
+            
+            // Function to mark announcement as read
+            function markAnnouncementAsRead(announcementId, button) {
+                fetch(`{{ path('student_announcement_read', {'id': 'ANNOUNCEMENT_ID'}) }}`.replace('ANNOUNCEMENT_ID', announcementId), {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the unread class from the announcement card
+                        const card = button.closest('.announcement-card');
+                        card.classList.remove('unread');
+                        
+                        // Remove the mark as read button
+                        button.remove();
+                        
+                        // Update the unread count in the navbar
+                        updateUnreadCount();
+                        
+                        // Show success message
+                        toastNotification.success({
+                            message: 'Announcement marked as read'
+                        });
+                    } else {
+                        toastNotification.error({
+                            message: data.message || 'An error occurred'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    toastNotification.error({
+                        message: 'An error occurred while marking the announcement as read'
+                    });
+                });
+            }
+            
+            // Function to update the unread count in the navbar
+            function updateUnreadCount() {
+                fetch('{{ path('student_announcements_count') }}')
+                .then(response => response.json())
+                .then(data => {
+                    const unreadBadge = document.querySelector('#announcementUnreadBadge');
+                    if (unreadBadge) {
+                        if (data.count > 0) {
+                            unreadBadge.textContent = data.count;
+                            unreadBadge.classList.remove('d-none');
+                        } else {
+                            unreadBadge.classList.add('d-none');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        });
+    </script>
+{% endblock %}

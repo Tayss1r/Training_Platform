@@ -1,0 +1,185 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Instructor Analytics{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('instructor_dashboard') }}">Instructor</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Analytics</li>
+            </ol>
+        </nav>
+
+        <!-- Analytics Overview -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="card-title m-0">Enrollment Trends</h5>
+                        <div class="dropdown">
+                            <button class="btn p-0" type="button" id="enrollmentTrendsMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="enrollmentTrendsMenu">
+                                <a class="dropdown-item" href="javascript:void(0);">Last 7 Days</a>
+                                <a class="dropdown-item" href="javascript:void(0);">Last 30 Days</a>
+                                <a class="dropdown-item" href="javascript:void(0);">Last 3 Months</a>
+                                <a class="dropdown-item" href="javascript:void(0);">Last Year</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="enrollmentTrendsChart" style="min-height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="card-title m-0">Course Popularity</h5>
+                        <div class="dropdown">
+                            <button class="btn p-0" type="button" id="coursePopularityMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="coursePopularityMenu">
+                                <a class="dropdown-item" href="javascript:void(0);">All Time</a>
+                                <a class="dropdown-item" href="javascript:void(0);">This Year</a>
+                                <a class="dropdown-item" href="javascript:void(0);">This Month</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="coursePopularityChart" style="min-height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Analytics -->
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="card-title m-0">Student Engagement</h5>
+                        <div class="dropdown">
+                            <button class="btn p-0" type="button" id="studentEngagementMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="studentEngagementMenu">
+                                <a class="dropdown-item" href="javascript:void(0);">Download Report</a>
+                                <a class="dropdown-item" href="javascript:void(0);">Share Report</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive text-nowrap">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Total Students</th>
+                                        <th>Sessions</th>
+                                        <th>Satisfaction</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-border-bottom-0">
+                                    <tr>
+                                        <td><strong>Introduction to Programming</strong></td>
+                                        <td>24</td>
+                                        <td>3 sessions</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bx bxs-star text-warning me-1"></i>
+                                                <i class="bx bxs-star text-warning me-1"></i>
+                                                <i class="bx bxs-star text-warning me-1"></i>
+                                                <i class="bx bxs-star text-warning me-1"></i>
+                                                <i class="bx bx-star text-warning"></i>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Web Development Basics</strong></td>
+                                        <td>18</td>
+                                        <td>2 sessions</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bx bxs-star text-warning me-1"></i>
+                                                <i class="bx bxs-star text-warning me-1"></i>
+                                                <i class="bx bxs-star text-warning me-1"></i>
+                                                <i class="bx bxs-star text-warning me-1"></i>
+                                                <i class="bx bxs-star-half text-warning"></i>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enrollment Trends Chart
+            var enrollmentOptions = {
+                series: [{
+                    name: 'Enrollments',
+                    data: {{ enrollmentTrendsData|raw }}
+                }],
+                chart: {
+                    height: 300,
+                    type: 'area',
+                    toolbar: {
+                        show: false
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth'
+                },
+                xaxis: {
+                    categories: {{ enrollmentTrendsLabels|raw }}
+                },
+                tooltip: {
+                    x: {
+                        format: 'MM/yy'
+                    },
+                }
+            };
+
+            var enrollmentChart = new ApexCharts(document.querySelector("#enrollmentTrendsChart"), enrollmentOptions);
+            enrollmentChart.render();
+
+            // Course Popularity Chart
+            var popularityOptions = {
+                series: {{ courseData|raw }},
+                chart: {
+                    height: 300,
+                    type: 'pie',
+                },
+                labels: {{ courseLabels|raw }},
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }]
+            };
+
+            var popularityChart = new ApexCharts(document.querySelector("#coursePopularityChart"), popularityOptions);
+            popularityChart.render();
+        });
+    </script>
+{% endblock %}

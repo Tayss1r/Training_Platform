@@ -108,11 +108,11 @@
                                         <br>
                                         <small class="text-muted">{{ session.course.category.name }}</small>
                                     </td>
-                                    <td>{{ session.date|date('Y-m-d') }}</td>
-                                    <td>{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</td>
+                                    <td>{{ session.startDate|date('Y-m-d') }}{% if session.startDate != session.endDate %} to {{ session.endDate|date('Y-m-d') }}{% endif %}</td>
+                                    <td>{{ session.time|date('H:i') }}</td>
                                     <td>{{ session.capacity }}</td>
                                     <td>
-                                        {% if session.date < date() %}
+                                        {% if session.startDate < date() %}
                                             <span class="badge bg-label-danger">Expired</span>
                                         {% else %}
                                             <span class="badge bg-label-success">Active</span>
@@ -151,7 +151,7 @@
                                                                 <i class="bx bx-error-circle me-2 fs-4"></i>
                                                                 <h6 class="alert-heading mb-0">Are you sure?</h6>
                                                             </div>
-                                                            <p class="mb-0 mt-2" style="word-break: break-word; white-space: normal;">This action cannot be undone. This will permanently delete the session for "{{ session.course.title }}" scheduled on {{ session.date|date('Y-m-d') }}.</p>
+                                                            <p class="mb-0 mt-2" style="word-break: break-word; white-space: normal;">This action cannot be undone. This will permanently delete the session for "{{ session.course.title }}" scheduled on {{ session.startDate|date('Y-m-d') }}.</p>
                                                         </div>
                                                     </div>
                                                     <div class="col-12">
@@ -160,8 +160,8 @@
                                                                 <h6 class="card-title">Session Details</h6>
                                                                 <ul class="list-unstyled mb-0">
                                                                     <li class="mb-2"><strong>Course:</strong> {{ session.course.title }}</li>
-                                                                    <li class="mb-2"><strong>Date:</strong> {{ session.date|date('Y-m-d') }}</li>
-                                                                    <li class="mb-2"><strong>Time:</strong> {{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</li>
+                                                                    <li class="mb-2"><strong>Date:</strong> {{ session.startDate|date('Y-m-d') }}{% if session.startDate != session.endDate %} to {{ session.endDate|date('Y-m-d') }}{% endif %}</li>
+                                                                    <li class="mb-2"><strong>Time:</strong> {{ session.time|date('H:i') }}</li>
                                                                     <li><strong>Capacity:</strong> {{ session.capacity }}</li>
                                                                 </ul>
                                                             </div>
@@ -209,4 +209,4 @@
             </div>
         </div>
     </div>
-{% endblock %} 
+{% endblock %}

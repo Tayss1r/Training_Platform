@@ -1,0 +1,433 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Student Sessions{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('instructor_dashboard') }}">Instructor</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('instructor_students') }}">Students</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('instructor_student_details', {'id': student.id}) }}">{{ student.firstName }} {{ student.lastName }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Sessions</li>
+            </ol>
+        </nav>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card instructor-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Student Information</h5>
+                        <div>
+                            <a href="{{ path('instructor_student_details', {'id': student.id}) }}" class="btn btn-primary">
+                                <i class="bx bx-user me-1"></i>Profile
+                            </a>
+                            <a href="{{ path('instructor_student_progress', {'id': student.id}) }}" class="btn btn-info ms-2">
+                                <i class="bx bx-bar-chart-alt-2 me-1"></i>Progress
+                            </a>
+                            <a href="{{ path('instructor_student_courses', {'id': student.id}) }}" class="btn btn-success ms-2">
+                                <i class="bx bx-book-open me-1"></i>Courses
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-md me-3">
+                                        {% if student.image is defined and student.image %}
+                                            <img src="{{ asset('assets/img/avatars/' ~ student.image) }}" alt="Avatar" class="rounded-circle">
+                                        {% else %}
+                                            <div class="avatar-initial rounded-circle bg-primary">{{ student.firstName|first }}{{ student.lastName|first }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ student.firstName }} {{ student.lastName }}</h6>
+                                        <small class="text-muted">{{ student.email }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <span class="icon-circle bg-info text-white"><i class="bx bx-calendar"></i></span>
+                                    <div class="ms-3">
+                                        <h6 class="mb-0">Total Sessions</h6>
+                                        <p class="mb-0">{{ sessions|length }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <span class="icon-circle bg-success text-white"><i class="bx bx-check-circle"></i></span>
+                                    <div class="ms-3">
+                                        <h6 class="mb-0">Attendance Rate</h6>
+                                        {% set attendedCount = 0 %}
+                                        {% set completedCount = 0 %}
+                                        {% set now = "now"|date('Y-m-d') %}
+
+                                        {% for sessionData in sessions %}
+                                            {% if sessionData.session.date|date('Y-m-d') < now %}
+                                                {% set completedCount = completedCount + 1 %}
+                                                {% if sessionData.attendance %}
+                                                    {% set attendedCount = attendedCount + 1 %}
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% set attendanceRate = completedCount > 0 ? (attendedCount / completedCount * 100)|round : 0 %}
+                                        <p class="mb-0">{{ attendanceRate }}%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card instructor-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Session History</h5>
+                        <div>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                                <i class="bx bx-filter-alt me-1"></i>Filter
+                            </button>
+                            <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#exportModal">
+                                <i class="bx bx-export me-1"></i>Export
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                <input type="text" class="form-control" id="searchSessions" placeholder="Search sessions...">
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table instructor-table" id="sessionsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                        <th>Attendance</th>
+                                        <th>Progress</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for sessionData in sessions %}
+                                        <tr data-course="{{ sessionData.course.title }}">
+                                            <td><strong>{{ sessionData.course.title }}</strong></td>
+                                            <td>{{ sessionData.session.startDate|date('Y-m-d') }}{% if sessionData.session.startDate != sessionData.session.endDate %} to {{ sessionData.session.endDate|date('Y-m-d') }}{% endif %}</td>
+                                            <td>{{ sessionData.session.time|date('H:i') }}</td>
+                                            <td>
+                                                {% set now = "now"|date('Y-m-d') %}
+                                                {% if sessionData.session.startDate|date('Y-m-d') > now %}
+                                                    <span class="badge-instructor badge-success">Upcoming</span>
+                                                {% elseif sessionData.session.endDate|date('Y-m-d') < now %}
+                                                    <span class="badge-instructor badge-info">Completed</span>
+                                                {% else %}
+                                                    <span class="badge-instructor badge-warning">In Progress</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if sessionData.session.date|date('Y-m-d') < now %}
+                                                    {% if sessionData.attendance %}
+                                                        <span class="badge bg-label-success">Present</span>
+                                                    {% else %}
+                                                        <span class="badge bg-label-danger">Absent</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-label-secondary">N/A</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress w-100 me-3" style="height: 8px;">
+                                                        <div class="progress-bar bg-primary" style="width: {{ sessionData.progress }}%;" role="progressbar" aria-valuenow="{{ sessionData.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                    <span>{{ sessionData.progress }}%</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#sessionModal{{ sessionData.session.id }}">
+                                                    <i class="bx bx-info-circle me-1"></i>Details
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="7" class="text-center">No sessions found</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session Detail Modals -->
+    {% for sessionData in sessions %}
+        <div class="modal fade instructor-modal" id="sessionModal{{ sessionData.session.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Session Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <h6 class="fw-semibold">Course</h6>
+                            <p>{{ sessionData.course.title }}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-semibold">Date & Time</h6>
+                            <p>{{ sessionData.session.startDate|date('Y-m-d') }}{% if sessionData.session.startDate != sessionData.session.endDate %} to {{ sessionData.session.endDate|date('Y-m-d') }}{% endif %}, {{ sessionData.session.time|date('H:i') }}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-semibold">Status</h6>
+                            {% set now = "now"|date('Y-m-d') %}
+                            {% if sessionData.session.startDate|date('Y-m-d') > now %}
+                                <span class="badge-instructor badge-success">Upcoming</span>
+                            {% elseif sessionData.session.endDate|date('Y-m-d') < now %}
+                                <span class="badge-instructor badge-info">Completed</span>
+                            {% else %}
+                                <span class="badge-instructor badge-warning">In Progress</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-semibold">Attendance</h6>
+                            {% if sessionData.session.date|date('Y-m-d') < now %}
+                                {% if sessionData.attendance %}
+                                    <span class="badge bg-label-success">Present</span>
+                                {% else %}
+                                    <span class="badge bg-label-danger">Absent</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-label-secondary">N/A</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-semibold">Progress</h6>
+                            <div class="progress mb-2" style="height: 8px;">
+                                <div class="progress-bar bg-primary" style="width: {{ sessionData.progress }}%;" role="progressbar" aria-valuenow="{{ sessionData.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">{{ sessionData.progress }}% completed</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-semibold">Enrollment Date</h6>
+                            <p>{{ sessionData.enrollment.createdAt is defined and sessionData.enrollment.createdAt ? sessionData.enrollment.createdAt|date('Y-m-d') : 'N/A' }}</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                        <a href="{{ path('instructor_session_details', {'id': sessionData.session.id}) }}" class="btn btn-primary">View Session</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    <!-- Filter Modal -->
+    <div class="modal fade instructor-modal" id="filterModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Filter Sessions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="filterForm" class="instructor-form">
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                <option value="">All</option>
+                                <option value="upcoming">Upcoming</option>
+                                <option value="today">Today</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Attendance</label>
+                            <select class="form-select" name="attendance">
+                                <option value="">All</option>
+                                <option value="present">Present</option>
+                                <option value="absent">Absent</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Date Range</label>
+                            <div class="input-group">
+                                <input type="date" class="form-control" name="startDate" placeholder="Start Date">
+                                <span class="input-group-text">to</span>
+                                <input type="date" class="form-control" name="endDate" placeholder="End Date">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="applyFilters">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal fade instructor-modal" id="exportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Export Session Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form class="instructor-form">
+                        <div class="mb-3">
+                            <label class="form-label">Export Format</label>
+                            <select class="form-select">
+                                <option value="csv">CSV</option>
+                                <option value="excel">Excel</option>
+                                <option value="pdf">PDF</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Data to Export</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="exportBasicInfo" checked>
+                                <label class="form-check-label" for="exportBasicInfo">Basic Information</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="exportAttendance" checked>
+                                <label class="form-check-label" for="exportAttendance">Attendance Records</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="exportProgress" checked>
+                                <label class="form-check-label" for="exportProgress">Progress Data</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success">Export Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search functionality
+            const searchInput = document.getElementById('searchSessions');
+            const table = document.getElementById('sessionsTable');
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+            searchInput.addEventListener('keyup', function() {
+                const searchText = searchInput.value.toLowerCase();
+
+                for (let i = 0; i < rows.length; i++) {
+                    const courseCell = rows[i].querySelector('td:nth-child(1)');
+                    const dateCell = rows[i].querySelector('td:nth-child(2)');
+
+                    if (courseCell && dateCell) {
+                        const course = courseCell.textContent || courseCell.innerText;
+                        const date = dateCell.textContent || dateCell.innerText;
+
+                        if (course.toLowerCase().indexOf(searchText) > -1 || date.indexOf(searchText) > -1) {
+                            rows[i].style.display = '';
+                        } else {
+                            rows[i].style.display = 'none';
+                        }
+                    }
+                }
+            });
+
+            // Filter functionality
+            const filterForm = document.getElementById('filterForm');
+            const applyFiltersBtn = document.getElementById('applyFilters');
+
+            if (applyFiltersBtn) {
+                applyFiltersBtn.addEventListener('click', function() {
+                    // Get filter values
+                    const status = filterForm.querySelector('select[name="status"]')?.value || '';
+                    const attendance = filterForm.querySelector('select[name="attendance"]')?.value || '';
+                    const startDate = filterForm.querySelector('input[name="startDate"]')?.value || '';
+                    const endDate = filterForm.querySelector('input[name="endDate"]')?.value || '';
+
+                    // Apply filters
+                    for (let i = 0; i < rows.length; i++) {
+                        let showRow = true;
+
+                        // Filter by status
+                        if (status && showRow) {
+                            const statusCell = rows[i].querySelector('td:nth-child(4)');
+                            if (statusCell) {
+                                const statusText = statusCell.textContent.trim().toLowerCase();
+                                if (!statusText.includes(status.toLowerCase())) {
+                                    showRow = false;
+                                }
+                            }
+                        }
+
+                        // Filter by attendance
+                        if (attendance && showRow) {
+                            const attendanceCell = rows[i].querySelector('td:nth-child(5)');
+                            if (attendanceCell) {
+                                const attendanceText = attendanceCell.textContent.trim().toLowerCase();
+                                if (attendance === 'present' && !attendanceText.includes('present')) {
+                                    showRow = false;
+                                } else if (attendance === 'absent' && !attendanceText.includes('absent')) {
+                                    showRow = false;
+                                }
+                            }
+                        }
+
+                        // Filter by date range
+                        if ((startDate || endDate) && showRow) {
+                            const dateCell = rows[i].querySelector('td:nth-child(2)');
+                            if (dateCell) {
+                                const sessionDate = new Date(dateCell.textContent.trim());
+
+                                if (startDate) {
+                                    const filterStartDate = new Date(startDate);
+                                    if (sessionDate < filterStartDate) {
+                                        showRow = false;
+                                    }
+                                }
+
+                                if (endDate && showRow) {
+                                    const filterEndDate = new Date(endDate);
+                                    if (sessionDate > filterEndDate) {
+                                        showRow = false;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Show or hide row based on filters
+                        rows[i].style.display = showRow ? '' : 'none';
+                    }
+
+                    // Close the modal
+                    const filterModal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
+                    filterModal.hide();
+                });
+            }
+        });
+    </script>
+{% endblock %}

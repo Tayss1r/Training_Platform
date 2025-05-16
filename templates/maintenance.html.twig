@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+    <title>{{ generalSettings.site_name|default('Forminy') }} - Maintenance</title>
+
+    <meta name="description" content="" />
+
+    <!-- Favicon -->
+    {% if appearanceSettings.favicon %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicons/' ~ appearanceSettings.favicon) }}" />
+    {% else %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('/assets/img/favicon/favicon.ico') }}" />
+    {% endif %}
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="{{ asset('vendor/fonts/boxicons.css') }}" />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="{{ asset('vendor/css/core.css') }}" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="{{ asset('vendor/css/theme-default.css') }}" class="template-customizer-theme-css" />
+
+    <style>
+        .maintenance-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .maintenance-icon {
+            font-size: 5rem;
+            margin-bottom: 2rem;
+            color: {{ appearanceSettings.primary_color|default('#696cff') }};
+        }
+
+        .maintenance-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .maintenance-message {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .maintenance-footer {
+            margin-top: 3rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="maintenance-container">
+        {% if appearanceSettings.logo %}
+            <img src="{{ asset('assets/img/logos/' ~ appearanceSettings.logo) }}" alt="Logo" height="80" class="mb-4">
+        {% else %}
+            <div class="maintenance-icon">
+                <i class="bx bx-wrench"></i>
+            </div>
+        {% endif %}
+
+        <h1 class="maintenance-title">Site Under Maintenance</h1>
+
+        <p class="maintenance-message">
+            {{ maintenanceSettings.maintenance_message|default('We are currently performing scheduled maintenance. Please check back soon.') }}
+        </p>
+
+        {% if is_admin is defined and is_admin %}
+            <div class="alert alert-warning">
+                <strong>Admin Notice:</strong> You're seeing this page because maintenance mode is enabled.
+            </div>
+            <div class="mt-4">
+                <a href="{{ path('admin_bypass_maintenance') }}" class="btn btn-primary me-2">Bypass Maintenance Mode</a>
+                <a href="{{ path('admin_disable_maintenance') }}" class="btn btn-danger me-2">Disable Maintenance Mode</a>
+                <a href="{{ path('admin_reset_maintenance') }}" class="btn btn-warning">Reset Maintenance Settings</a>
+            </div>
+            <div class="mt-3">
+                <p>You can also directly access any admin page by going to <code>/admin/dashboard</code>, <code>/admin/settings</code>, etc.</p>
+                <p>For troubleshooting: <a href="{{ path('admin_view_settings') }}" target="_blank">View All Settings</a></p>
+            </div>
+        {% endif %}
+
+        <div class="maintenance-footer">
+            &copy; {{ "now"|date("Y") }} {{ generalSettings.site_name|default('Forminy') }}
+        </div>
+    </div>
+</body>
+</html>
