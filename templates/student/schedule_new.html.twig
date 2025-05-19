@@ -1,0 +1,356 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Schedule{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .schedule-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #696cff;
+        }
+
+        .schedule-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.25rem 1rem rgba(161, 172, 184, 0.45);
+        }
+
+        .schedule-date {
+            font-size: 0.85rem;
+            color: #697a8d;
+        }
+
+        .schedule-time {
+            font-size: 0.85rem;
+            color: #697a8d;
+            font-weight: 500;
+        }
+
+        .session-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .session-badge-upcoming {
+            background-color: rgba(105, 108, 255, 0.1);
+            color: #696cff;
+        }
+
+        .session-badge-today {
+            background-color: rgba(255, 171, 0, 0.1);
+            color: #ffab00;
+        }
+
+        .session-badge-past {
+            background-color: rgba(105, 122, 141, 0.1);
+            color: #697a8d;
+        }
+
+        .filter-dropdown {
+            min-width: 150px;
+        }
+
+        .session-details {
+            transition: all 0.3s ease;
+        }
+
+        .session-details:hover {
+            background-color: rgba(105, 108, 255, 0.05);
+        }
+
+        .course-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+            background-color: rgba(105, 108, 255, 0.1);
+            color: #696cff;
+            font-size: 1.25rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4">My Schedule</h4>
+
+        <div class="row">
+            <!-- Upcoming Sessions -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Upcoming Sessions</h5>
+                        <span class="badge bg-primary rounded-pill">{{ upcomingSessions|length }}</span>
+                    </div>
+                    <div class="card-body">
+                        {% if upcomingSessions|length > 0 %}
+                            {% for session in upcomingSessions %}
+                                <div class="schedule-card p-3 mb-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="mb-0">{{ session.course.title }}</h6>
+                                        <span class="session-badge session-badge-upcoming">Upcoming</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <div class="schedule-date">
+                                            <i class="bx bx-calendar me-1"></i>
+                                            {{ session.startDate|date('Y-m-d') }}
+                                            {% if session.startDate != session.endDate %}
+                                                to {{ session.endDate|date('Y-m-d') }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="schedule-time">
+                                            <i class="bx bx-time me-1"></i>
+                                            {{ session.time|date('H:i') }}
+                                        </div>
+                                    </div>
+                                    {% if session.location %}
+                                        <div class="small text-muted">
+                                            <i class="bx bx-map me-1"></i> {{ session.location }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-3">
+                                <div class="mb-3">
+                                    <i class="bx bx-calendar-x fs-1 text-muted"></i>
+                                </div>
+                                <h6>No upcoming sessions</h6>
+                                <p class="text-muted">You don't have any upcoming sessions scheduled.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Sessions -->
+            <div class="col-md-8 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Today's Sessions</h5>
+                    </div>
+                    <div class="card-body">
+                        {% set todaySessions = [] %}
+                        {% set today = "now"|date('Y-m-d') %}
+
+                        {% for session in enrolledSessions %}
+                            {% if session.startDate|date('Y-m-d') <= today and session.endDate|date('Y-m-d') >= today %}
+                                {% set todaySessions = todaySessions|merge([session]) %}
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if todaySessions|length > 0 %}
+                            {% for session in todaySessions %}
+                                <div class="d-flex align-items-start p-3 mb-3 border rounded session-details">
+                                    <div class="course-icon me-3">
+                                        <i class="bx bx-book"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h5 class="mb-0">{{ session.course.title }}</h5>
+                                            <span class="session-badge session-badge-today">Today</span>
+                                        </div>
+                                        <div class="d-flex mb-2">
+                                            <div class="me-3">
+                                                <i class="bx bx-time me-1"></i>
+                                                {{ session.time|date('H:i') }}
+                                            </div>
+                                            {% if session.location %}
+                                                <div>
+                                                    <i class="bx bx-map me-1"></i>
+                                                    {{ session.location }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        {% if session.description %}
+                                            <p class="mb-0 text-muted small">{{ session.description }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <div class="mb-3">
+                                    <i class="bx bx-calendar-check fs-1 text-muted"></i>
+                                </div>
+                                <h6>No sessions today</h6>
+                                <p class="text-muted">You don't have any sessions scheduled for today.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- All Sessions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">All Sessions</h5>
+                        <div class="d-flex">
+                            <div class="dropdown me-2">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bx bx-filter-alt me-1"></i> Filter
+                                </button>
+                                <ul class="dropdown-menu filter-dropdown" aria-labelledby="filterDropdown">
+                                    <li><a class="dropdown-item filter-item active" href="#" data-filter="all">All Sessions</a></li>
+                                    <li><a class="dropdown-item filter-item" href="#" data-filter="upcoming">Upcoming</a></li>
+                                    <li><a class="dropdown-item filter-item" href="#" data-filter="today">Today</a></li>
+                                    <li><a class="dropdown-item filter-item" href="#" data-filter="past">Past</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bx bx-sort me-1"></i> Sort
+                                </button>
+                                <ul class="dropdown-menu filter-dropdown" aria-labelledby="sortDropdown">
+                                    <li><a class="dropdown-item sort-item active" href="#" data-sort="date-asc">Date (Newest First)</a></li>
+                                    <li><a class="dropdown-item sort-item" href="#" data-sort="date-desc">Date (Oldest First)</a></li>
+                                    <li><a class="dropdown-item sort-item" href="#" data-sort="course">Course Name</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if enrolledSessions|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table" id="sessionsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Course</th>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Location</th>
+                                            <th>Status</th>
+                                            <th>Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for session in enrolledSessions %}
+                                            {% set now = "now"|date('Y-m-d') %}
+                                            {% set status = '' %}
+                                            {% set statusClass = '' %}
+
+                                            {% if session.startDate|date('Y-m-d') > now %}
+                                                {% set status = 'Upcoming' %}
+                                                {% set statusClass = 'session-badge-upcoming' %}
+                                                {% set statusFilter = 'upcoming' %}
+                                            {% elseif session.startDate|date('Y-m-d') < now %}
+                                                {% set status = 'Past' %}
+                                                {% set statusClass = 'session-badge-past' %}
+                                                {% set statusFilter = 'past' %}
+                                            {% else %}
+                                                {% set status = 'Today' %}
+                                                {% set statusClass = 'session-badge-today' %}
+                                                {% set statusFilter = 'today' %}
+                                            {% endif %}
+
+                                            <tr data-status="{{ statusFilter }}" data-course="{{ session.course.title }}" data-date="{{ session.startDate|date('Y-m-d') }}">
+                                                <td>{{ session.course.title }}</td>
+                                                <td>
+                                                    {{ session.startDate|date('Y-m-d') }}
+                                                    {% if session.startDate != session.endDate %}
+                                                        to {{ session.endDate|date('Y-m-d') }}
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ session.time|date('H:i') }}</td>
+                                                <td>{{ session.location|default('Not specified') }}</td>
+                                                <td>
+                                                    <span class="session-badge {{ statusClass }}">{{ status }}</span>
+                                                </td>
+                                                <td>{{ session.type|default('Regular') }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-3">
+                                <div class="mb-3">
+                                    <i class="bx bx-calendar-x fs-1 text-muted"></i>
+                                </div>
+                                <h6>No sessions found</h6>
+                                <p class="text-muted">You are not enrolled in any sessions yet.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter functionality
+            const filterItems = document.querySelectorAll('.filter-item');
+            const sortItems = document.querySelectorAll('.sort-item');
+            const sessionsTable = document.getElementById('sessionsTable');
+
+            if (sessionsTable) {
+                const rows = sessionsTable.querySelectorAll('tbody tr');
+
+                // Filter sessions
+                filterItems.forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+
+                        // Update active state
+                        filterItems.forEach(i => i.classList.remove('active'));
+                        this.classList.add('active');
+
+                        const filter = this.getAttribute('data-filter');
+
+                        rows.forEach(row => {
+                            if (filter === 'all' || row.getAttribute('data-status') === filter) {
+                                row.style.display = '';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                    });
+                });
+
+                // Sort sessions
+                sortItems.forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+
+                        // Update active state
+                        sortItems.forEach(i => i.classList.remove('active'));
+                        this.classList.add('active');
+
+                        const sort = this.getAttribute('data-sort');
+                        const tbody = sessionsTable.querySelector('tbody');
+                        const rowsArray = Array.from(rows);
+
+                        rowsArray.sort((a, b) => {
+                            if (sort === 'date-asc') {
+                                return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
+                            } else if (sort === 'date-desc') {
+                                return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
+                            } else if (sort === 'course') {
+                                return a.getAttribute('data-course').localeCompare(b.getAttribute('data-course'));
+                            }
+                            return 0;
+                        });
+
+                        // Remove existing rows
+                        rows.forEach(row => row.remove());
+
+                        // Append sorted rows
+                        rowsArray.forEach(row => tbody.appendChild(row));
+                    });
+                });
+            }
+        });
+    </script>
+{% endblock %}

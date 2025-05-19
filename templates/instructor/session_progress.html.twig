@@ -1,0 +1,128 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Session Progress{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('instructor_dashboard') }}">Instructor</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('instructor_sessions') }}">Sessions</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('instructor_session_details', {'id': session.id}) }}">Session Details</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Progress</li>
+            </ol>
+        </nav>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card instructor-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Session Information</h5>
+                        <div>
+                            <a href="{{ path('instructor_session_details', {'id': session.id}) }}" class="btn btn-primary">
+                                <i class="bx bx-info-circle me-1"></i>Session Details
+                            </a>
+                            <a href="{{ path('instructor_session_students', {'id': session.id}) }}" class="btn btn-info ms-2">
+                                <i class="bx bx-user-check me-1"></i>View Students
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <span class="icon-circle bg-primary text-white"><i class="bx bx-book"></i></span>
+                                    <div class="ms-3">
+                                        <h6 class="mb-0">Course</h6>
+                                        <p class="mb-0">{{ course.title }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <span class="icon-circle bg-success text-white"><i class="bx bx-calendar"></i></span>
+                                    <div class="ms-3">
+                                        <h6 class="mb-0">Date</h6>
+                                        <p class="mb-0">{{ session.date|date('Y-m-d') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <span class="icon-circle bg-info text-white"><i class="bx bx-time"></i></span>
+                                    <div class="ms-3">
+                                        <h6 class="mb-0">Time</h6>
+                                        <p class="mb-0">{{ session.startTime|date('H:i') }} - {{ session.endTime|date('H:i') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card instructor-card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title mb-3">Attendance</h6>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="progress flex-grow-1 me-3" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: {{ (progressData.attendance.attended / progressData.attendance.total * 100)|round }}%;" role="progressbar" aria-valuenow="{{ (progressData.attendance.attended / progressData.attendance.total * 100)|round }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <span class="fw-semibold">{{ (progressData.attendance.attended / progressData.attendance.total * 100)|round }}%</span>
+                        </div>
+                        <p class="card-text text-muted">{{ progressData.attendance.attended|round }} out of {{ progressData.attendance.total }} students attended</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card instructor-card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title mb-3">Session Status</h6>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-success">Completed</span>
+                        </div>
+                        <p class="card-text text-muted">Session has been completed</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card instructor-card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title mb-3">Satisfaction Rating</h6>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-2">
+                                <span class="fw-semibold fs-4">{{ progressData.satisfaction.rating }}</span>
+                                <span class="text-muted">/5</span>
+                            </div>
+                            <div>
+                                {% for i in 1..5 %}
+                                    {% if i <= progressData.satisfaction.rating %}
+                                        <i class="bx bxs-star text-warning"></i>
+                                    {% elseif i <= progressData.satisfaction.rating + 0.5 %}
+                                        <i class="bx bxs-star-half text-warning"></i>
+                                    {% else %}
+                                        <i class="bx bx-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="card-text text-muted">Based on {{ progressData.satisfaction.responses|round }} student responses</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 text-center mt-4">
+                <a href="{{ path('instructor_session_students', {'id': session.id}) }}" class="btn btn-primary">
+                    <i class="bx bx-user-check me-1"></i>View Session Students
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

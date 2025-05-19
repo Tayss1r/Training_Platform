@@ -26,12 +26,16 @@
             content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
     {% block favTitle %}
-        <title>Forminy</title>
+        <title>{{ generalSettings.site_name|default('Forminy') }}</title>
     {% endblock %}
-    <meta name="description" content="" />
+    <meta name="description" content="{{ generalSettings.site_description|default('A comprehensive learning management system for educational institutions.') }}" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('/assets/img/favicon/favicon.ico') }}" />
+    {% if appearanceSettings.favicon %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicons/' ~ appearanceSettings.favicon) }}" />
+    {% else %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('/assets/img/favicon/favicon.ico') }}" />
+    {% endif %}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
     <!-- Fonts -->
@@ -63,6 +67,9 @@
     <script src="{{ asset('vendor/js/config.js') }}"></script>
 
     <link rel="stylesheet" href="{{ asset('assets/styles/app.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/styles/instructor.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/course-cards.css') }}" />
 </head>
 
 <body>
@@ -74,63 +81,43 @@
         <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
             <div class="app-brand demo">
                 <a href="{{ path('home') }}" class="app-brand-link">
-              <span class="app-brand-logo demo">
-                <svg
-                        width="25"
-                        viewBox="0 0 25 42"
-                        version="1.1"
-                        xmlns="http://www.w3.org/2000/svg"
-                        xmlns:xlink="http://www.w3.org/1999/xlink"
-                >
-                  <defs>
-                    <path
-                            d="M13.7918663,0.358365126 L3.39788168,7.44174259 C0.566865006,9.69408886 -0.379795268,12.4788597 0.557900856,15.7960551 C0.68998853,16.2305145 1.09562888,17.7872135 3.12357076,19.2293357 C3.8146334,19.7207684 5.32369333,20.3834223 7.65075054,21.2172976 L7.59773219,21.2525164 L2.63468769,24.5493413 C0.445452254,26.3002124 0.0884951797,28.5083815 1.56381646,31.1738486 C2.83770406,32.8170431 5.20850219,33.2640127 7.09180128,32.5391577 C8.347334,32.0559211 11.4559176,30.0011079 16.4175519,26.3747182 C18.0338572,24.4997857 18.6973423,22.4544883 18.4080071,20.2388261 C17.963753,17.5346866 16.1776345,15.5799961 13.0496516,14.3747546 L10.9194936,13.4715819 L18.6192054,7.984237 L13.7918663,0.358365126 Z"
-                            id="path-1"
-                    ></path>
-                    <path
-                            d="M5.47320593,6.00457225 C4.05321814,8.216144 4.36334763,10.0722806 6.40359441,11.5729822 C8.61520715,12.571656 10.0999176,13.2171421 10.8577257,13.5094407 L15.5088241,14.433041 L18.6192054,7.984237 C15.5364148,3.11535317 13.9273018,0.573395879 13.7918663,0.358365126 C13.5790555,0.511491653 10.8061687,2.3935607 5.47320593,6.00457225 Z"
-                            id="path-3"
-                    ></path>
-                    <path
-                            d="M7.50063644,21.2294429 L12.3234468,23.3159332 C14.1688022,24.7579751 14.397098,26.4880487 13.008334,28.506154 C11.6195701,30.5242593 10.3099883,31.790241 9.07958868,32.3040991 C5.78142938,33.4346997 4.13234973,34 4.13234973,34 C4.13234973,34 2.75489982,33.0538207 2.37032616e-14,31.1614621 C-0.55822714,27.8186216 -0.55822714,26.0572515 -4.05231404e-15,25.8773518 C0.83734071,25.6075023 2.77988457,22.8248993 3.3049379,22.52991 C3.65497346,22.3332504 5.05353963,21.8997614 7.50063644,21.2294429 Z"
-                            id="path-4"
-                    ></path>
-                    <path
-                            d="M20.6,7.13333333 L25.6,13.8 C26.2627417,14.6836556 26.0836556,15.9372583 25.2,16.6 C24.8538077,16.8596443 24.4327404,17 24,17 L14,17 C12.8954305,17 12,16.1045695 12,15 C12,14.5672596 12.1403557,14.1461923 12.4,13.8 L17.4,7.13333333 C18.0627417,6.24967773 19.3163444,6.07059163 20.2,6.73333333 C20.3516113,6.84704183 20.4862915,6.981722 20.6,7.13333333 Z"
-                            id="path-5"
-                    ></path>
-                  </defs>
-                  <g id="g-app-brand" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                    <g id="Brand-Logo" transform="translate(-27.000000, -15.000000)">
-                      <g id="Icon" transform="translate(27.000000, 15.000000)">
-                        <g id="Mask" transform="translate(0.000000, 8.000000)">
-                          <mask id="mask-2" fill="white">
-                            <use xlink:href="#path-1"></use>
-                          </mask>
-                          <use fill="#696cff" xlink:href="#path-1"></use>
-                          <g id="Path-3" mask="url(#mask-2)">
-                            <use fill="#696cff" xlink:href="#path-3"></use>
-                            <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-3"></use>
-                          </g>
-                          <g id="Path-4" mask="url(#mask-2)">
-                            <use fill="#696cff" xlink:href="#path-4"></use>
-                            <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-4"></use>
-                          </g>
-                        </g>
-                        <g
-                                id="Triangle"
-                                transform="translate(19.000000, 11.000000) rotate(-300.000000) translate(-19.000000, -11.000000) "
-                        >
-                          <use fill="#696cff" xlink:href="#path-5"></use>
-                          <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-5"></use>
-                        </g>
-                      </g>
-                    </g>
-                  </g>
-                </svg>
-              </span>
-                    <span class="app-brand-text demo menu-text fw-bolder ms-2" style="font-size: 1.5rem;">Forminy</span>
-
+                    {% if appearanceSettings.logo %}
+                        <img src="{{ asset('assets/img/logos/' ~ appearanceSettings.logo) }}" alt="Logo" height="40" class="me-2">
+                    {% else %}
+                        <span class="app-brand-logo demo">
+                            <svg width="25" viewBox="0 0 25 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <defs>
+                                    <path d="M13.7918663,0.358365126 L3.39788168,7.44174259 C0.566865006,9.69408886 -0.379795268,12.4788597 0.557900856,15.7960551 C0.68998853,16.2305145 1.09562888,17.7872135 3.12357076,19.2293357 C3.8146334,19.7207684 5.32369333,20.3834223 7.65075054,21.2172976 L7.59773219,21.2525164 L2.63468769,24.5493413 C0.445452254,26.3002124 0.0884951797,28.5083815 1.56381646,31.1738486 C2.83770406,32.8170431 5.20850219,33.2640127 7.09180128,32.5391577 C8.347334,32.0559211 11.4559176,30.0011079 16.4175519,26.3747182 C18.0338572,24.4997857 18.6973423,22.4544883 18.4080071,20.2388261 C17.963753,17.5346866 16.1776345,15.5799961 13.0496516,14.3747546 L10.9194936,13.4715819 L18.6192054,7.984237 L13.7918663,0.358365126 Z" id="path-1"></path>
+                                    <path d="M5.47320593,6.00457225 C4.05321814,8.216144 4.36334763,10.0722806 6.40359441,11.5729822 C8.61520715,12.571656 10.0999176,13.2171421 10.8577257,13.5094407 L15.5088241,14.433041 L18.6192054,7.984237 C15.5364148,3.11535317 13.9273018,0.573395879 13.7918663,0.358365126 C13.5790555,0.511491653 10.8061687,2.3935607 5.47320593,6.00457225 Z" id="path-3"></path>
+                                    <path d="M7.50063644,21.2294429 L12.3234468,23.3159332 C14.1688022,24.7579751 14.397098,26.4880487 13.008334,28.506154 C11.6195701,30.5242593 10.3099883,31.790241 9.07958868,32.3040991 C5.78142938,33.4346997 4.13234973,34 4.13234973,34 C4.13234973,34 2.75489982,33.0538207 2.37032616e-14,31.1614621 C-0.55822714,27.8186216 -0.55822714,26.0572515 -4.05231404e-15,25.8773518 C0.83734071,25.6075023 2.77988457,22.8248993 3.3049379,22.52991 C3.65497346,22.3332504 5.05353963,21.8997614 7.50063644,21.2294429 Z" id="path-4"></path>
+                                    <path d="M20.6,7.13333333 L25.6,13.8 C26.2627417,14.6836556 26.0836556,15.9372583 25.2,16.6 C24.8538077,16.8596443 24.4327404,17 24,17 L14,17 C12.8954305,17 12,16.1045695 12,15 C12,14.5672596 12.1403557,14.1461923 12.4,13.8 L17.4,7.13333333 C18.0627417,6.24967773 19.3163444,6.07059163 20.2,6.73333333 C20.3516113,6.84704183 20.4862915,6.981722 20.6,7.13333333 Z" id="path-5"></path>
+                                </defs>
+                                <g id="g-app-brand" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Brand-Logo" transform="translate(-27.000000, -15.000000)">
+                                        <g id="Icon" transform="translate(27.000000, 15.000000)">
+                                            <g id="Mask" transform="translate(0.000000, 8.000000)">
+                                                <mask id="mask-2" fill="white"><use xlink:href="#path-1"></use></mask>
+                                                <use fill="{{ appearanceSettings.primary_color|default('#696cff') }}" xlink:href="#path-1"></use>
+                                                <g id="Path-3" mask="url(#mask-2)">
+                                                    <use fill="{{ appearanceSettings.primary_color|default('#696cff') }}" xlink:href="#path-3"></use>
+                                                    <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-3"></use>
+                                                </g>
+                                                <g id="Path-4" mask="url(#mask-2)">
+                                                    <use fill="{{ appearanceSettings.primary_color|default('#696cff') }}" xlink:href="#path-4"></use>
+                                                    <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-4"></use>
+                                                </g>
+                                            </g>
+                                            <g id="Triangle" transform="translate(19.000000, 11.000000) rotate(-300.000000) translate(-19.000000, -11.000000) ">
+                                                <use fill="{{ appearanceSettings.primary_color|default('#696cff') }}" xlink:href="#path-5"></use>
+                                                <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-5"></use>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
+                        </span>
+                    {% endif %}
+                    <span class="app-brand-text demo menu-text fw-bolder ms-2" style="font-size: 1.5rem;">{{ generalSettings.site_name|default('Forminy') }}</span>
                 </a>
 
                 <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -185,15 +172,75 @@
                         </a>
                     </li>
                     <li class="menu-item">
+                        <a href="{{ path('admin_courses') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-book"></i>
+                            <div data-i18n="Analytics">Manage Courses</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
                         <a href="{{ path('admin_sessions') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-calendar"></i>
                             <div data-i18n="Analytics">Manage Sessions</div>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="{{ path('admin_courses') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-book"></i>
-                            <div data-i18n="Analytics">Manage Courses</div>
+                        <a href="{{ path('admin_users') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-user-circle"></i>
+                            <div data-i18n="Analytics">Manage Users</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('admin_categories') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-category"></i>
+                            <div data-i18n="Analytics">Manage Categories</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('admin_reports') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-line-chart"></i>
+                            <div data-i18n="Analytics">System Reports</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('admin_settings') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-cog"></i>
+                            <div data-i18n="Analytics">System Settings</div>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% if is_granted('ROLE_INSTRUCTOR') %}
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">Instructor</span>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('instructor_dashboard') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <div data-i18n="Analytics">Dashboard</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('instructor_sessions') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                            <div data-i18n="Analytics">My Sessions</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('instructor_students') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-user-check"></i>
+                            <div data-i18n="Analytics">My Students</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('instructor_materials') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-file"></i>
+                            <div data-i18n="Analytics">Course Materials</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ path('instructor_analytics') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
+                            <div data-i18n="Analytics">Analytics</div>
                         </a>
                     </li>
                 {% endif %}
@@ -237,7 +284,17 @@
                     <!-- /Search -->
 
                     <ul class="navbar-nav flex-row align-items-center ms-auto">
-                        <!-- Place this tag where you want the button to render. -->
+                        <!-- Announcements -->
+                        {% if is_granted('ROLE_USER') and not is_granted('ROLE_ADMIN') and not is_granted('ROLE_INSTRUCTOR') %}
+                        <li class="nav-item me-3">
+                            <a class="nav-link" href="{{ path('student_announcements') }}">
+                                <i class="bx bx-bell fs-4"></i>
+                                <span id="announcementUnreadBadge" class="badge rounded-pill bg-danger badge-notifications {% if unreadAnnouncementsCount is not defined or unreadAnnouncementsCount == 0 %}d-none{% endif %}">
+                                    {{ unreadAnnouncementsCount|default(0) }}
+                                </span>
+                            </a>
+                        </li>
+                        {% endif %}
 
                         <!-- User -->
                         <li class="nav-item navbar-dropdown dropdown-user dropdown">
@@ -252,79 +309,254 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li>
-                                    <a class="dropdown-item" href="#">
-                                        <div class="d-flex">
+                                    <div class="dropdown-item p-4">
+                                        <div class="d-flex align-items-center">
                                             <div class="flex-shrink-0 me-3">
                                                 <div class="avatar avatar-online">
                                                     {% if app.user %}
-                                                        <img src="{{ asset('assets/img/avatars/' ~ app.user.image) }}" alt="User Avatar" class="w-px-40 h-auto rounded-circle" />
+                                                        <img src="{{ asset('assets/img/avatars/' ~ app.user.image) }}" alt="User Avatar" class="w-px-50 h-auto rounded-circle" />
                                                     {% else %}
-                                                        <img src="{{ asset('assets/img/avatars/6.png') }}" alt="Default Avatar" class="w-px-40 h-auto rounded-circle" />
+                                                        <img src="{{ asset('assets/img/avatars/6.png') }}" alt="Default Avatar" class="w-px-50 h-auto rounded-circle" />
                                                     {% endif %}
                                                 </div>
                                             </div>
                                             <div class="flex-grow-1">
                                                 {% if app.user %}
-                                                    <span class="fw-semibold d-block">{{ app.user.email|split('@')[0] }}</span>
-                                                    <small class="text-muted">
+                                                    <h5 class="mb-0">{{ app.user.firstName }} {{ app.user.lastName }}</h5>
+                                                    <p class="mb-0 text-muted small">{{ app.user.email }}</p>
+                                                    <div class="mt-1">
                                                         {% if 'ROLE_ADMIN' in app.user.roles %}
-                                                            Admin
+                                                            <span class="badge bg-label-primary">Administrator</span>
+                                                        {% elseif 'ROLE_INSTRUCTOR' in app.user.roles %}
+                                                            <span class="badge bg-label-info">Instructor</span>
                                                         {% elseif 'ROLE_USER' in app.user.roles %}
-                                                            User
+                                                            <span class="badge bg-label-success">Student</span>
                                                         {% else %}
-                                                            Unknown Role
+                                                            <span class="badge bg-label-secondary">Unknown Role</span>
                                                         {% endif %}
-                                                    </small>
+                                                    </div>
                                                 {% else %}
-                                                    <span class="fw-semibold d-block">Guest</span>
-                                                    <small class="text-muted">No role assigned</small>
+                                                    <h5 class="mb-0">Welcome, Guest!</h5>
+                                                    <p class="mb-0 text-muted small">Please login or register</p>
                                                 {% endif %}
                                             </div>
                                         </div>
-                                    </a>
+                                    </div>
                                 </li>
                                 <li>
                                     <div class="dropdown-divider"></div>
                                 </li>
                                 {% if app.user %}
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase">Admin Panel</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_dashboard') }}">
+                                                <i class="bx bx-home-circle me-2 text-primary"></i>
+                                                <span class="align-middle">Dashboard</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase mt-2">Content Management</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_courses') }}">
+                                                <i class="bx bx-book me-2 text-info"></i>
+                                                <span class="align-middle">Courses</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_sessions') }}">
+                                                <i class="bx bx-calendar me-2 text-success"></i>
+                                                <span class="align-middle">Sessions</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_categories') }}">
+                                                <i class="bx bx-category me-2 text-warning"></i>
+                                                <span class="align-middle">Categories</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase mt-2">User Management</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_users') }}">
+                                                <i class="bx bx-user-circle me-2 text-danger"></i>
+                                                <span class="align-middle">Users</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase mt-2">System</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_reports') }}">
+                                                <i class="bx bx-line-chart me-2 text-secondary"></i>
+                                                <span class="align-middle">Reports</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('admin_settings') }}">
+                                                <i class="bx bx-cog me-2 text-dark"></i>
+                                                <span class="align-middle">Settings</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <div class="dropdown-divider"></div>
+                                        </li>
+                                    {% endif %}
+
+                                    {% if is_granted('ROLE_INSTRUCTOR') %}
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase">Instructor Portal</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('instructor_dashboard') }}">
+                                                <i class="bx bx-home-circle me-2 text-primary"></i>
+                                                <span class="align-middle">Dashboard</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase mt-2">Teaching</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('instructor_sessions') }}">
+                                                <i class="bx bx-calendar-check me-2 text-success"></i>
+                                                <span class="align-middle">My Sessions</span>
+                                                <span class="badge rounded-pill bg-success ms-auto">Active</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('instructor_students') }}">
+                                                <i class="bx bx-user-check me-2 text-info"></i>
+                                                <span class="align-middle">My Students</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('instructor_materials') }}">
+                                                <i class="bx bx-file me-2 text-warning"></i>
+                                                <span class="align-middle">Course Materials</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase mt-2">Performance</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('instructor_analytics') }}">
+                                                <i class="bx bx-bar-chart-alt-2 me-2 text-danger"></i>
+                                                <span class="align-middle">Analytics</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <div class="dropdown-divider"></div>
+                                        </li>
+                                    {% endif %}
+
+                                    {% if is_granted('ROLE_USER') and not is_granted('ROLE_ADMIN') and not is_granted('ROLE_INSTRUCTOR') %}
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase">Student Portal</h6>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('student_announcements') }}">
+                                                <i class="bx bx-bell me-2 text-danger"></i>
+                                                <span class="align-middle">Announcements</span>
+                                                {% if unreadAnnouncementsCount is defined and unreadAnnouncementsCount > 0 %}
+                                                    <span class="badge rounded-pill bg-danger ms-auto">{{ unreadAnnouncementsCount }}</span>
+                                                {% endif %}
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('my_enrollments') }}">
+                                                <i class="bx bx-book-open me-2 text-primary"></i>
+                                                <span class="align-middle">My Enrollments</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <h6 class="dropdown-header text-uppercase mt-2">Quick Actions</h6>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('home') }}">
+                                                <i class="bx bx-search me-2 text-info"></i>
+                                                <span class="align-middle">Browse Courses</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ path('student_schedule') }}">
+                                                <i class="bx bx-calendar me-2 text-success"></i>
+                                                <span class="align-middle">My Schedule</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <div class="dropdown-divider"></div>
+                                        </li>
+                                    {% endif %}
                                     <li>
-                                        <a class="dropdown-item" href="{{ path('my_enrollments') }}">
-                                            <i class="bx bx-calendar-check me-2"></i>
-                                            <span class="align-middle">My Enrollments</span>
-                                        </a>
+                                        <h6 class="dropdown-header text-uppercase">Account</h6>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{{ path('app_user_profile') }}">
-                                            <i class="bx bx-user me-2"></i>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('app_user_profile') }}">
+                                            <i class="bx bx-user me-2 text-primary"></i>
                                             <span class="align-middle">My Profile</span>
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{{ path('app_user_settings') }}">
-                                            <i class="bx bx-cog me-2"></i>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('app_user_settings') }}">
+                                            <i class="bx bx-cog me-2 text-secondary"></i>
                                             <span class="align-middle">Settings</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('help_center') }}">
+                                            <i class="bx bx-help-circle me-2 text-info"></i>
+                                            <span class="align-middle">Help Center</span>
                                         </a>
                                     </li>
                                     <li>
                                         <div class="dropdown-divider"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{{ path('app_logout') }}">
+                                        <a class="dropdown-item d-flex align-items-center text-danger" href="{{ path('app_logout') }}">
                                             <i class="bx bx-power-off me-2"></i>
                                             <span class="align-middle">Logout</span>
                                         </a>
                                     </li>
                                 {% else %}
                                     <li>
-                                        <a class="dropdown-item" href="{{ path('app_login') }}">
-                                            <i class="bx bx-log-in me-2"></i>
+                                        <h6 class="dropdown-header text-uppercase">Welcome, Guest!</h6>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('app_login') }}">
+                                            <i class="bx bx-log-in me-2 text-primary"></i>
                                             <span class="align-middle">Login</span>
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{{ path('app_register') }}">
-                                            <i class="bx bx-user-plus me-2"></i>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('app_register') }}">
+                                            <i class="bx bx-user-plus me-2 text-success"></i>
                                             <span class="align-middle">Register</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-divider"></div>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('home') }}">
+                                            <i class="bx bx-book me-2 text-info"></i>
+                                            <span class="align-middle">Browse Courses</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ path('help_center') }}">
+                                            <i class="bx bx-help-circle me-2 text-secondary"></i>
+                                            <span class="align-middle">Help Center</span>
                                         </a>
                                     </li>
                                 {% endif %}
@@ -352,7 +584,7 @@
                         <script>
                             document.write(new Date().getFullYear());
                         </script>
-                        , made with ❤️ by Forminy
+                        , made with ❤️ by {{ generalSettings.site_name|default('Forminy') }}
                     </div>
                 </div>
             </footer>
@@ -378,6 +610,9 @@
 
 <!-- Main JS -->
 <script src="{{ asset('vendor/js/main.js') }}"></script>
+
+<!-- Custom fixes -->
+<script src="{{ asset('assets/js/fixes.js') }}"></script>
 
 <!-- Page JS -->
 {% block javascripts %}{% endblock %}

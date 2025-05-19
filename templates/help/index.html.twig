@@ -1,0 +1,245 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Help Center{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .help-card {
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .help-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(161, 172, 184, 0.45);
+        }
+        
+        .help-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .faq-item {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            border: 1px solid #d9dee3;
+        }
+        
+        .faq-header {
+            padding: 1rem 1.25rem;
+            background-color: #f5f5f9;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .faq-body {
+            padding: 1.25rem;
+            background-color: #fff;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4">
+            <span class="text-muted fw-light">Support /</span> Help Center
+        </h4>
+        
+        <!-- Help Categories -->
+        <div class="row mb-5">
+            <div class="col-md-4 mb-3">
+                <div class="card help-card">
+                    <div class="card-body text-center p-4">
+                        <div class="help-icon text-primary">
+                            <i class="bx bx-book-open"></i>
+                        </div>
+                        <h5 class="card-title">Getting Started</h5>
+                        <p class="card-text">New to our platform? Learn the basics and get started quickly.</p>
+                        <a href="#getting-started" class="btn btn-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card help-card">
+                    <div class="card-body text-center p-4">
+                        <div class="help-icon text-success">
+                            <i class="bx bx-user-voice"></i>
+                        </div>
+                        <h5 class="card-title">Student Resources</h5>
+                        <p class="card-text">Resources and guides for students to make the most of their courses.</p>
+                        <a href="#student-resources" class="btn btn-success">Explore</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card help-card">
+                    <div class="card-body text-center p-4">
+                        <div class="help-icon text-info">
+                            <i class="bx bx-support"></i>
+                        </div>
+                        <h5 class="card-title">Contact Support</h5>
+                        <p class="card-text">Need help? Our support team is ready to assist you with any questions.</p>
+                        <a href="#contact-support" class="btn btn-info">Get Help</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Frequently Asked Questions -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Frequently Asked Questions</h5>
+            </div>
+            <div class="card-body">
+                <div class="faq-item" id="getting-started">
+                    <div class="faq-header" data-bs-toggle="collapse" data-bs-target="#faq1">
+                        <i class="bx bx-plus me-2"></i> How do I enroll in a course?
+                    </div>
+                    <div id="faq1" class="collapse faq-body">
+                        <p>To enroll in a course, follow these steps:</p>
+                        <ol>
+                            <li>Browse the available courses on the homepage or through the course catalog.</li>
+                            <li>Click on a course to view its details.</li>
+                            <li>On the course details page, click the "Enroll" button.</li>
+                            <li>Select the session you want to join.</li>
+                            <li>Confirm your enrollment.</li>
+                        </ol>
+                        <p>Once enrolled, you'll have access to all course materials and can participate in the sessions.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-header" data-bs-toggle="collapse" data-bs-target="#faq2">
+                        <i class="bx bx-plus me-2"></i> How do I access my course materials?
+                    </div>
+                    <div id="faq2" class="collapse faq-body">
+                        <p>You can access your course materials in several ways:</p>
+                        <ul>
+                            <li>From your dashboard, click on the enrolled course.</li>
+                            <li>Navigate to "My Enrollments" from the user dropdown menu.</li>
+                            <li>Click on a specific session to view all associated materials.</li>
+                        </ul>
+                        <p>Course materials may include documents, presentations, videos, and other resources provided by your instructor.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item" id="student-resources">
+                    <div class="faq-header" data-bs-toggle="collapse" data-bs-target="#faq3">
+                        <i class="bx bx-plus me-2"></i> How do I view announcements from my instructors?
+                    </div>
+                    <div id="faq3" class="collapse faq-body">
+                        <p>Announcements from your instructors can be viewed in the following ways:</p>
+                        <ul>
+                            <li>Click on the bell icon in the top navigation bar to see recent announcements.</li>
+                            <li>Go to the "Announcements" section in the user dropdown menu.</li>
+                            <li>Visit the session details page where all announcements for that session are listed.</li>
+                        </ul>
+                        <p>You'll receive a notification badge when you have unread announcements.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-header" data-bs-toggle="collapse" data-bs-target="#faq4">
+                        <i class="bx bx-plus me-2"></i> How do I check my schedule?
+                    </div>
+                    <div id="faq4" class="collapse faq-body">
+                        <p>To check your schedule:</p>
+                        <ul>
+                            <li>Click on "My Schedule" in the user dropdown menu.</li>
+                            <li>View your upcoming sessions, organized by date and time.</li>
+                            <li>You can also see your schedule on your dashboard.</li>
+                        </ul>
+                        <p>The schedule shows all your enrolled sessions with their dates, times, and locations.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item" id="contact-support">
+                    <div class="faq-header" data-bs-toggle="collapse" data-bs-target="#faq5">
+                        <i class="bx bx-plus me-2"></i> How do I contact support?
+                    </div>
+                    <div id="faq5" class="collapse faq-body">
+                        <p>If you need assistance, you can contact our support team through the following channels:</p>
+                        <ul>
+                            <li>Email: support@forminy.com</li>
+                            <li>Phone: (123) 456-7890</li>
+                            <li>Use the contact form below</li>
+                        </ul>
+                        <p>Our support team is available Monday through Friday, 9:00 AM to 5:00 PM.</p>
+                        
+                        <form class="mt-4">
+                            <div class="mb-3">
+                                <label class="form-label">Subject</label>
+                                <select class="form-select">
+                                    <option>General Question</option>
+                                    <option>Technical Issue</option>
+                                    <option>Billing Question</option>
+                                    <option>Course Content</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Message</label>
+                                <textarea class="form-control" rows="4" placeholder="Describe your issue or question"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle plus/minus icons in FAQ
+            const faqHeaders = document.querySelectorAll('.faq-header');
+            
+            faqHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const icon = this.querySelector('i');
+                    if (icon.classList.contains('bx-plus')) {
+                        icon.classList.replace('bx-plus', 'bx-minus');
+                    } else {
+                        icon.classList.replace('bx-minus', 'bx-plus');
+                    }
+                });
+            });
+            
+            // Open FAQ item if hash is present in URL
+            if (window.location.hash) {
+                const hash = window.location.hash;
+                const targetFaq = document.querySelector(hash);
+                if (targetFaq) {
+                    // Find the closest collapse element
+                    const collapseTarget = targetFaq.querySelector('.collapse');
+                    if (collapseTarget) {
+                        // Show the collapse
+                        const bsCollapse = new bootstrap.Collapse(collapseTarget, {
+                            toggle: true
+                        });
+                        
+                        // Change the icon
+                        const icon = targetFaq.querySelector('.faq-header i');
+                        if (icon) {
+                            icon.classList.replace('bx-plus', 'bx-minus');
+                        }
+                        
+                        // Scroll to the element
+                        setTimeout(() => {
+                            targetFaq.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 300);
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}

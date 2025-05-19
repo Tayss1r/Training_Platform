@@ -1,0 +1,439 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Course Materials{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        #notification-container {
+            max-width: 350px;
+        }
+
+        #notification-container .alert {
+            margin-bottom: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid;
+        }
+
+        #notification-container .alert-success {
+            border-left-color: #28a745;
+        }
+
+        #notification-container .alert-danger {
+            border-left-color: #dc3545;
+        }
+
+        .fade {
+            transition: opacity 0.3s linear;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('instructor_dashboard') }}">Instructor</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Course Materials</li>
+            </ol>
+        </nav>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Course Materials</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                            {% for course in courses %}
+                                <button class="nav-link {% if loop.first %}active{% endif %}" id="v-pills-{{ course.id }}-tab" data-bs-toggle="pill" data-bs-target="#v-pills-{{ course.id }}" type="button" role="tab" aria-controls="v-pills-{{ course.id }}" aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
+                                    {{ course.title }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="tab-content" id="v-pills-tabContent">
+                            {% for course in courses %}
+                                <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="v-pills-{{ course.id }}" role="tabpanel" aria-labelledby="v-pills-{{ course.id }}-tab">
+                                    <h5 class="mb-3">{{ course.title }} Materials</h5>
+
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0">Documents</h6>
+                                            <button type="button" class="btn btn-sm btn-primary add-document-btn" data-course-id="{{ course.id }}">
+                                                <i class="bx bx-plus me-1"></i>Add Document
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-group list-group-flush" id="documents-list-{{ course.id }}">
+                                                {% for document in courseMaterials[course.id].documents %}
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center" data-material-id="{{ document.id }}">
+                                                        <div>
+                                                            {% if document.fileType == 'pdf' %}
+                                                                <i class="bx bxs-file-pdf me-2 text-danger"></i>
+                                                            {% elseif document.fileType in ['doc', 'docx'] %}
+                                                                <i class="bx bxs-file-doc me-2 text-info"></i>
+                                                            {% elseif document.fileType in ['xls', 'xlsx'] %}
+                                                                <i class="bx bxs-file-doc me-2 text-success"></i>
+                                                            {% elseif document.fileType in ['ppt', 'pptx'] %}
+                                                                <i class="bx bxs-file-doc me-2 text-warning"></i>
+                                                            {% else %}
+                                                                <i class="bx bxs-file me-2 text-secondary"></i>
+                                                            {% endif %}
+                                                            <a href="{{ document.filePath }}" target="_blank">{{ document.title }}</a>
+                                                            <small class="text-muted ms-2">({{ document.fileSize }})</small>
+                                                        </div>
+                                                        <div>
+                                                            <button class="btn btn-sm btn-outline-primary me-1 edit-document-btn"
+                                                                    data-material-id="{{ document.id }}"
+                                                                    data-title="{{ document.title }}"
+                                                                    data-description="{{ document.description }}">
+                                                                <i class="bx bx-edit"></i>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-outline-danger delete-document-btn"
+                                                                    data-material-id="{{ document.id }}"
+                                                                    data-title="{{ document.title }}">
+                                                                <i class="bx bx-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="list-group-item text-center">No documents available</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Document Modal -->
+    <div class="modal fade" id="addMaterialModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Document</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addMaterialForm" enctype="multipart/form-data">
+                        <input type="hidden" name="course" id="materialCourse">
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control" name="title" placeholder="Document title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3" placeholder="Document description"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">File Upload</label>
+                            <input class="form-control" type="file" name="file" required>
+                            <small class="text-muted">Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, etc.</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="addDocumentBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Document Modal -->
+    <div class="modal fade" id="editMaterialModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Document</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editMaterialForm" enctype="multipart/form-data">
+                        <input type="hidden" name="materialId" id="editMaterialId">
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control" name="title" id="editMaterialTitle" placeholder="Document title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" id="editMaterialDescription" rows="3" placeholder="Document description"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Replace File (Optional)</label>
+                            <input class="form-control" type="file" name="file">
+                            <small class="text-muted">Leave empty to keep the current file</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="updateDocumentBtn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteMaterialModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the document "<span id="deleteMaterialTitle"></span>"?</p>
+                    <p class="text-danger">This action cannot be undone.</p>
+                    <input type="hidden" id="deleteMaterialId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Document</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Function to show notifications
+        function showNotification(type, message) {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+
+            // Set notification styles based on type
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            notification.role = 'alert';
+
+            // Add notification content
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+
+            // Add to container
+            container.appendChild(notification);
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    container.removeChild(notification);
+                }, 300);
+            }, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add Document functionality
+            const addDocumentBtns = document.querySelectorAll('.add-document-btn');
+            const addMaterialModal = document.getElementById('addMaterialModal');
+            const addMaterialForm = document.getElementById('addMaterialForm');
+            const addDocumentBtn = document.getElementById('addDocumentBtn');
+
+            // Initialize Bootstrap modals
+            const addModal = new bootstrap.Modal(document.getElementById('addMaterialModal'));
+            const editModal = new bootstrap.Modal(document.getElementById('editMaterialModal'));
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteMaterialModal'));
+
+            // Handle Add Document button click
+            addDocumentBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const courseId = this.getAttribute('data-course-id');
+                    console.log('Setting course ID to:', courseId);
+                    document.getElementById('materialCourse').value = courseId;
+                    addMaterialForm.reset();
+                    // Reset the form but keep the course ID
+                    setTimeout(() => {
+                        document.getElementById('materialCourse').value = courseId;
+                        console.log('Course ID after reset:', document.getElementById('materialCourse').value);
+                    }, 0);
+                    addModal.show();
+                });
+            });
+
+            // Handle Add Document form submission
+            addDocumentBtn.addEventListener('click', function() {
+                // Get the course ID before creating the FormData
+                const courseId = document.getElementById('materialCourse').value;
+                console.log('Course ID before form submission:', courseId);
+
+                // Create FormData object
+                const formData = new FormData(addMaterialForm);
+
+                // Make sure the course ID is in the form data
+                if (!formData.has('course') || !formData.get('course')) {
+                    formData.set('course', courseId);
+                    console.log('Added course ID to form data:', courseId);
+                }
+
+                // Validate form
+                const title = formData.get('title');
+                const file = formData.get('file');
+
+                if (!title || !file.name) {
+                    showNotification('error', 'Title and file are required');
+                    return;
+                }
+
+                // Debug form data
+                console.log('Form data:');
+                for (let pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+
+                // Send AJAX request
+                fetch('{{ path('instructor_material_create') }}', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.success) {
+                        // Show success message
+                        showNotification('success', data.message);
+
+                        // Close the modal
+                        addModal.hide();
+
+                        // Reload the page to show the new document
+                        window.location.reload();
+                    } else {
+                        // Show error message
+                        showNotification('error', data.message || 'An error occurred while adding the document');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    console.error('Error details:', error.message, error.stack);
+                    showNotification('error', 'An error occurred while adding the document: ' + error.message);
+                });
+            });
+
+            // Edit Document functionality
+            const editDocumentBtns = document.querySelectorAll('.edit-document-btn');
+            const editMaterialForm = document.getElementById('editMaterialForm');
+            const updateDocumentBtn = document.getElementById('updateDocumentBtn');
+
+            // Handle Edit Document button click
+            editDocumentBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const materialId = this.getAttribute('data-material-id');
+                    const title = this.getAttribute('data-title');
+                    const description = this.getAttribute('data-description');
+
+                    document.getElementById('editMaterialId').value = materialId;
+                    document.getElementById('editMaterialTitle').value = title;
+                    document.getElementById('editMaterialDescription').value = description || '';
+
+                    editModal.show();
+                });
+            });
+
+            // Handle Edit Document form submission
+            updateDocumentBtn.addEventListener('click', function() {
+                // Create FormData object
+                const formData = new FormData(editMaterialForm);
+                const materialId = document.getElementById('editMaterialId').value;
+
+                // Validate form
+                const title = formData.get('title');
+
+                if (!title) {
+                    showNotification('error', 'Title is required');
+                    return;
+                }
+
+                // Send AJAX request
+                fetch(`{{ path('instructor_material_edit', {'id': 'MATERIAL_ID'}) }}`.replace('MATERIAL_ID', materialId), {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        showNotification('success', data.message);
+
+                        // Close the modal
+                        editModal.hide();
+
+                        // Reload the page to show the updated document
+                        window.location.reload();
+                    } else {
+                        // Show error message
+                        showNotification('error', data.message || 'An error occurred while updating the document');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('error', 'An error occurred while updating the document');
+                });
+            });
+
+            // Delete Document functionality
+            const deleteDocumentBtns = document.querySelectorAll('.delete-document-btn');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+            // Handle Delete Document button click
+            deleteDocumentBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const materialId = this.getAttribute('data-material-id');
+                    const title = this.getAttribute('data-title');
+
+                    document.getElementById('deleteMaterialId').value = materialId;
+                    document.getElementById('deleteMaterialTitle').textContent = title;
+
+                    deleteModal.show();
+                });
+            });
+
+            // Handle Delete Document confirmation
+            confirmDeleteBtn.addEventListener('click', function() {
+                const materialId = document.getElementById('deleteMaterialId').value;
+
+                // Send AJAX request
+                fetch(`{{ path('instructor_material_delete', {'id': 'MATERIAL_ID'}) }}`.replace('MATERIAL_ID', materialId), {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        showNotification('success', data.message);
+
+                        // Close the modal
+                        deleteModal.hide();
+
+                        // Reload the page to update the documents list
+                        window.location.reload();
+                    } else {
+                        // Show error message
+                        showNotification('error', data.message || 'An error occurred while deleting the document');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('error', 'An error occurred while deleting the document');
+                });
+            });
+        });
+    </script>
+{% endblock %}

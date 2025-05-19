@@ -1,0 +1,221 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contact Support{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .contact-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .contact-card {
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(161, 172, 184, 0.45);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4">
+            <span class="text-muted fw-light">Support /</span> Contact Us
+        </h4>
+        
+        <!-- Contact Methods -->
+        <div class="row mb-5">
+            <div class="col-md-4 mb-3">
+                <div class="card contact-card">
+                    <div class="card-body text-center p-4">
+                        <div class="contact-icon text-primary">
+                            <i class="bx bx-envelope"></i>
+                        </div>
+                        <h5 class="card-title">Email Support</h5>
+                        <p class="card-text">Send us an email and we'll get back to you within 24 hours.</p>
+                        <a href="mailto:support@forminy.com" class="btn btn-primary">Email Us</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card contact-card">
+                    <div class="card-body text-center p-4">
+                        <div class="contact-icon text-success">
+                            <i class="bx bx-phone"></i>
+                        </div>
+                        <h5 class="card-title">Phone Support</h5>
+                        <p class="card-text">Call our support team during business hours for immediate assistance.</p>
+                        <a href="tel:+11234567890" class="btn btn-success">Call Us</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card contact-card">
+                    <div class="card-body text-center p-4">
+                        <div class="contact-icon text-info">
+                            <i class="bx bx-chat"></i>
+                        </div>
+                        <h5 class="card-title">Live Chat</h5>
+                        <p class="card-text">Chat with our support team in real-time for quick answers.</p>
+                        <button class="btn btn-info" id="startChatBtn">Start Chat</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Form -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Send Us a Message</h5>
+            </div>
+            <div class="card-body">
+                <form id="contactForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-control" placeholder="Enter your first name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-control" placeholder="Enter your last name" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" placeholder="Enter your email address" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Subject</label>
+                        <select class="form-select" required>
+                            <option value="">Select a subject</option>
+                            <option>General Question</option>
+                            <option>Technical Issue</option>
+                            <option>Billing Question</option>
+                            <option>Course Content</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-control" rows="5" placeholder="Enter your message" required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- FAQ Section -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Frequently Asked Questions</h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                What are your support hours?
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Our support team is available Monday through Friday, from 9:00 AM to 5:00 PM Eastern Time. Email support is available 24/7, and we aim to respond to all inquiries within 24 hours.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                How quickly can I expect a response?
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                For phone and live chat support, you'll receive immediate assistance during business hours. For email inquiries, we aim to respond within 24 hours on business days.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                Can I get help with technical issues?
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes, our support team can assist with technical issues related to the platform. For complex technical problems, our technical support specialists will work with you to resolve the issue.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle contact form submission
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // In a real application, you would send the form data to the server
+                    // For now, we'll just show a success message
+                    
+                    Toastify({
+                        text: "Your message has been sent! We'll get back to you soon.",
+                        duration: 3000,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        style: {
+                            background: "#71dd37",
+                        }
+                    }).showToast();
+                    
+                    // Reset the form
+                    contactForm.reset();
+                });
+            }
+            
+            // Handle live chat button
+            const startChatBtn = document.getElementById('startChatBtn');
+            if (startChatBtn) {
+                startChatBtn.addEventListener('click', function() {
+                    // In a real application, this would open a chat widget
+                    // For now, we'll just show a message
+                    
+                    Toastify({
+                        text: "Live chat is not available in this demo. Please use email or phone support.",
+                        duration: 3000,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        style: {
+                            background: "#03c3ec",
+                        }
+                    }).showToast();
+                });
+            }
+        });
+    </script>
+{% endblock %}

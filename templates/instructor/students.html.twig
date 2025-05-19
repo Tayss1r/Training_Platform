@@ -1,0 +1,337 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Instructor Students{% endblock %}
+
+{% block body %}
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('instructor_dashboard') }}">Instructor</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Students</li>
+            </ol>
+        </nav>
+
+        <div class="card instructor-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">My Students</h5>
+                <div>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                        <i class="bx bx-filter-alt me-1"></i>Filter
+                    </button>
+                    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#emailModal">
+                        <i class="bx bx-envelope me-1"></i>Email All
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bx bx-search"></i></span>
+                        <input type="text" class="form-control" id="searchStudents" placeholder="Search students...">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table instructor-table" id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Email</th>
+                                <th>Enrolled Courses</th>
+                                <th>Last Activity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for studentId, studentData in students %}
+                                <tr data-student-id="{{ studentId }}" data-courses="{{ studentData.courses|keys|join(',') }}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-2">
+                                                {% if studentData.user.image is defined and studentData.user.image %}
+                                                    <img src="{{ asset('assets/img/avatars/' ~ studentData.user.image) }}" alt="Avatar" class="rounded-circle">
+                                                {% else %}
+                                                    <div class="avatar-initial rounded-circle bg-primary">{{ studentData.user.firstName|first }}{{ studentData.user.lastName|first }}</div>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <strong>{{ studentData.user.firstName }} {{ studentData.user.lastName }}</strong>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ studentData.user.email }}</td>
+                                    <td>{{ studentData.enrollmentsCount }}</td>
+                                    <td>{{ "now"|date('Y-m-d') }}</td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" href="{{ path('instructor_student_details', {'id': studentId}) }}">
+                                                    <i class="bx bx-user me-1"></i>View Profile
+                                                </a>
+                                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#emailStudentModal{{ studentId }}">
+                                                    <i class="bx bx-envelope me-1"></i>Send Email
+                                                </a>
+                                                <a class="dropdown-item" href="{{ path('instructor_student_progress', {'id': studentId}) }}">
+                                                    <i class="bx bx-bar-chart-alt-2 me-1"></i>View Progress
+                                                </a>
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item" href="{{ path('instructor_student_courses', {'id': studentId}) }}">
+                                                    <i class="bx bx-book-open me-1"></i>View Courses ({{ studentData.coursesCount }})
+                                                </a>
+                                                <a class="dropdown-item" href="{{ path('instructor_student_sessions', {'id': studentId}) }}">
+                                                    <i class="bx bx-calendar me-1"></i>View Sessions ({{ studentData.sessionsCount }})
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No students found</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Modal -->
+    <div class="modal fade instructor-modal" id="filterModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Filter Students</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="filterForm" class="instructor-form">
+                        <div class="mb-3">
+                            <label class="form-label">Course</label>
+                            <select class="form-select" name="course">
+                                <option value="">All Courses</option>
+                                {% for course in courses %}
+                                    <option value="{{ course.id }}">{{ course.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Enrollment Status</label>
+                            <select class="form-select" name="status">
+                                <option value="">All</option>
+                                <option value="active">Active</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Search</label>
+                            <input type="text" class="form-control" name="search" placeholder="Search by name or email">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="applyFilters">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email All Modal -->
+    <div class="modal fade instructor-modal" id="emailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Email All Students</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="emailForm" class="instructor-form">
+                        <div class="mb-3">
+                            <label class="form-label">Subject</label>
+                            <input type="text" class="form-control" placeholder="Email subject">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea class="form-control" rows="5" placeholder="Your message to students"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Send Email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Individual Email Modals -->
+    {% for studentId, studentData in students %}
+        <div class="modal fade instructor-modal" id="emailStudentModal{{ studentId }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Email {{ studentData.user.firstName }} {{ studentData.user.lastName }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="instructor-form">
+                            <div class="mb-3">
+                                <label class="form-label">Subject</label>
+                                <input type="text" class="form-control" placeholder="Email subject">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Message</label>
+                                <textarea class="form-control" rows="5" placeholder="Your message to {{ studentData.user.firstName }}"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary">Send Email</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search functionality
+            const searchInput = document.getElementById('searchStudents');
+            const table = document.getElementById('studentsTable');
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+            searchInput.addEventListener('keyup', function() {
+                const searchText = searchInput.value.toLowerCase();
+
+                for (let i = 0; i < rows.length; i++) {
+                    const nameCell = rows[i].querySelector('td:nth-child(1)');
+                    const emailCell = rows[i].querySelector('td:nth-child(2)');
+
+                    if (nameCell && emailCell) {
+                        const name = nameCell.textContent || nameCell.innerText;
+                        const email = emailCell.textContent || emailCell.innerText;
+
+                        if (name.toLowerCase().indexOf(searchText) > -1 || email.toLowerCase().indexOf(searchText) > -1) {
+                            rows[i].style.display = '';
+                        } else {
+                            rows[i].style.display = 'none';
+                        }
+                    }
+                }
+
+                // Check if any rows are visible
+                let visibleRows = false;
+                for (let i = 0; i < rows.length; i++) {
+                    if (rows[i].style.display !== 'none') {
+                        visibleRows = true;
+                        break;
+                    }
+                }
+
+                // Show "No students found" message if no rows are visible
+                let noStudentsRow = table.querySelector('tbody tr.no-students-row');
+                if (!visibleRows) {
+                    if (!noStudentsRow) {
+                        const tbody = table.querySelector('tbody');
+                        noStudentsRow = document.createElement('tr');
+                        noStudentsRow.className = 'no-students-row';
+                        noStudentsRow.innerHTML = '<td colspan="5" class="text-center">No students match your search</td>';
+                        tbody.appendChild(noStudentsRow);
+                    } else {
+                        noStudentsRow.style.display = '';
+                    }
+                } else if (noStudentsRow) {
+                    noStudentsRow.style.display = 'none';
+                }
+            });
+
+            // Filter functionality
+            const filterForm = document.getElementById('filterForm');
+            const applyFiltersBtn = document.getElementById('applyFilters');
+
+            if (applyFiltersBtn) {
+                applyFiltersBtn.addEventListener('click', function() {
+                    // Get filter values
+                    const courseId = filterForm.querySelector('select[name="course"]')?.value || '';
+                    const status = filterForm.querySelector('select[name="status"]')?.value || '';
+                    const searchTerm = filterForm.querySelector('input[name="search"]')?.value || '';
+
+                    console.log('Applying filters:', { courseId, status, searchTerm });
+
+                    // Apply filters
+                    for (let i = 0; i < rows.length; i++) {
+                        let showRow = true;
+
+                        // Filter by course
+                        if (courseId && showRow) {
+                            const coursesAttr = rows[i].getAttribute('data-courses');
+                            if (coursesAttr) {
+                                const courses = coursesAttr.split(',');
+                                if (!courses.includes(courseId)) {
+                                    showRow = false;
+                                }
+                            }
+                        }
+
+                        // Filter by status (active/completed)
+                        // This would require additional data attributes or server-side filtering
+
+                        // Filter by search term
+                        if (searchTerm && showRow) {
+                            const nameCell = rows[i].querySelector('td:nth-child(1)');
+                            const emailCell = rows[i].querySelector('td:nth-child(2)');
+
+                            if (nameCell && emailCell) {
+                                const name = nameCell.textContent || nameCell.innerText;
+                                const email = emailCell.textContent || emailCell.innerText;
+
+                                if (name.toLowerCase().indexOf(searchTerm.toLowerCase()) === -1 &&
+                                    email.toLowerCase().indexOf(searchTerm.toLowerCase()) === -1) {
+                                    showRow = false;
+                                }
+                            }
+                        }
+
+                        // Show or hide row based on filters
+                        rows[i].style.display = showRow ? '' : 'none';
+                    }
+
+                    // Check if any rows are visible
+                    let visibleRows = false;
+                    for (let i = 0; i < rows.length; i++) {
+                        if (rows[i].style.display !== 'none') {
+                            visibleRows = true;
+                            break;
+                        }
+                    }
+
+                    // Show "No students found" message if no rows are visible
+                    let noStudentsRow = table.querySelector('tbody tr.no-students-row');
+                    if (!visibleRows) {
+                        if (!noStudentsRow) {
+                            const tbody = table.querySelector('tbody');
+                            noStudentsRow = document.createElement('tr');
+                            noStudentsRow.className = 'no-students-row';
+                            noStudentsRow.innerHTML = '<td colspan="5" class="text-center">No students match your filter criteria</td>';
+                            tbody.appendChild(noStudentsRow);
+                        } else {
+                            noStudentsRow.style.display = '';
+                        }
+                    } else if (noStudentsRow) {
+                        noStudentsRow.style.display = 'none';
+                    }
+
+                    // Close the modal
+                    const filterModal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
+                    filterModal.hide();
+                });
+            }
+        });
+    </script>
+{% endblock %}
