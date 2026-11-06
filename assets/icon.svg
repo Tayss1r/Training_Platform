@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Training Platform: a graduation cap over an open book">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7f6cff"/>
+      <stop offset="1" stop-color="#3a2a8c"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <!-- open book -->
+  <path d="M20 74 C34 68 50 68 64 76 C78 68 94 68 108 74 V104 C94 98 78 98 64 106 C50 98 34 98 20 104 Z" fill="#ffffff" fill-opacity=".14"/>
+  <path d="M20 74 C34 68 50 68 64 76 C78 68 94 68 108 74 V104 C94 98 78 98 64 106 C50 98 34 98 20 104 Z" fill="none" stroke="#ffffff" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M64 76 V106" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+  <g stroke="#ffffff" stroke-opacity=".5" stroke-width="2.5" stroke-linecap="round">
+    <path d="M30 82 C38 80 46 80 54 83M30 91 C38 89 46 89 54 92M74 83 C82 80 90 80 98 82M74 92 C82 89 90 89 98 91"/>
+  </g>
+  <!-- graduation cap -->
+  <path d="M64 18 L104 36 L64 54 L24 36 Z" fill="#ffffff"/>
+  <path d="M42 44 V56 C42 62 52 66 64 66 C76 66 86 62 86 56 V44 L64 54 Z" fill="#ffffff" fill-opacity=".85"/>
+  <path d="M100 38 V54" stroke="#ffc94d" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="100" cy="57" r="4.2" fill="#ffc94d"/>
+</svg>
